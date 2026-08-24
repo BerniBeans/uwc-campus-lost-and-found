@@ -458,11 +458,36 @@ def create_app() -> Flask:
         "development-key-change-later",
     )
 
-    # The database will be stored at:
-    # instance/lost_found.db
-    app.config["SQLALCHEMY_DATABASE_URI"] = (
-        "sqlite:///lost_found.db"
-    )
+    # -----------------------------------------------------
+    # DATABASE CONFIGURATION
+    # -----------------------------------------------------
+
+    database_url = os.environ.get("DATABASE_URL")
+
+    if database_url:
+        # Use PostgreSQL when DATABASE_URL is supplied
+        # by the production environment.
+        if database_url.startswith("postgres://"):
+            database_url = database_url.replace(
+                "postgres://",
+                "postgresql+psycopg2://",
+                1,
+            )
+
+        elif database_url.startswith("postgresql://"):
+            database_url = database_url.replace(
+                "postgresql://",
+                "postgresql+psycopg2://",
+                1,
+            )
+
+        app.config["SQLALCHEMY_DATABASE_URI"] = database_url
+
+    else:
+        # Use SQLite for local development.
+        app.config["SQLALCHEMY_DATABASE_URI"] = (
+            "sqlite:///lost_found.db"
+        )
 
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
@@ -477,6 +502,7 @@ def create_app() -> Flask:
     # -----------------------------------------------------
 
     upload_folder = Path(app.static_folder) / "uploads"
+
     upload_folder.mkdir(
         parents=True,
         exist_ok=True,
