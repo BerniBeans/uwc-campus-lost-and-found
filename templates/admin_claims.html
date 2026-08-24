@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Claim Administration | Campus Lost and Found
+{% endblock %}
+
+{% block content %}
+    <h1>Ownership-claim administration</h1>
+
+    <p>
+        Review ownership claims submitted for found items.
+        This page is restricted to administrator accounts.
+    </p>
+
+    <div class="admin-notice">
+        Claim information and private verification details must
+        be treated as confidential.
+    </div>
+
+    <section>
+        <h2>
+            Pending claims
+            ({{ pending_claims|length }})
+        </h2>
+
+        {% if pending_claims %}
+            <div class="claim-list">
+                {% for claim in pending_claims %}
+                    <article class="claim-card pending-card">
+                        <div class="claim-heading">
+                            <h3>
+                                Claim C-{{ claim.id }}
+                            </h3>
+
+                            <span class="pending-label">
+                                Pending
+                            </span>
+                        </div>
+
+                        <p>
+                            <strong>Found item:</strong>
+                            F-{{ claim.found_item.id }} —
+                            {{ claim.found_item.item_name }}
+                        </p>
+
+                        <p>
+                            <strong>Claimant:</strong>
+                            {{ claim.claimant.first_name }}
+                            {{ claim.claimant.surname }}
+                        </p>
+
+                        <p>
+                            <strong>Student number:</strong>
+                            {{ claim.claimant.student_number }}
+                        </p>
+
+                        <p>
+                            <strong>Submitted:</strong>
+                            {{
+                                claim.created_at.strftime(
+                                    "%d %B %Y at %H:%M"
+                                )
+                            }}
+                        </p>
+
+                        <a
+                            href="{{
+                                url_for(
+                                    'review_claim',
+                                    claim_id=claim.id
+                                )
+                            }}"
+                            class="review-button"
+                        >
+                            Review claim
+                        </a>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-result">
+                There are no pending ownership claims.
+            </div>
+        {% endif %}
+    </section>
+
+    <hr>
+
+    <section>
+        <h2>Recently reviewed claims</h2>
+
+        {% if reviewed_claims %}
+            <div class="claim-list">
+                {% for claim in reviewed_claims %}
+                    <article class="claim-card">
+                        <div class="claim-heading">
+                            <h3>
+                                Claim C-{{ claim.id }}
+                            </h3>
+
+                            <span
+                                class="
+                                    status-label
+                                    {% if claim.status == 'APPROVED' %}
+                                        approved-label
+                                    {% else %}
+                                        rejected-label
+                                    {% endif %}
+                                "
+                            >
+                                {{ claim.status.title() }}
+                            </span>
+                        </div>
+
+                        <p>
+                            <strong>Found item:</strong>
+                            F-{{ claim.found_item.id }} —
+                            {{ claim.found_item.item_name }}
+                        </p>
+
+                        <p>
+                            <strong>Claimant:</strong>
+                            {{ claim.claimant.first_name }}
+                            {{ claim.claimant.surname }}
+                        </p>
+
+                        {% if claim.review_notes %}
+                            <p>
+                                <strong>Review notes:</strong>
+                                {{ claim.review_notes }}
+                            </p>
+                        {% endif %}
+
+                        <a
+                            href="{{
+                                url_for(
+                                    'review_claim',
+                                    claim_id=claim.id
+                                )
+                            }}"
+                        >
+                            View details
+                        </a>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-result">
+                No claims have been reviewed yet.
+            </div>
+        {% endif %}
+    </section>
+
+    <p class="page-actions">
+        <a href="{{ url_for('dashboard') }}">
+            Return to dashboard
+        </a>
+    </p>
+
+    <style>
+        .admin-notice {
+            background: #fef3c7;
+            border-left: 4px solid #d97706;
+            color: #78350f;
+            margin: 20px 0;
+            padding: 14px 16px;
+        }
+
+        .claim-list {
+            display: grid;
+            gap: 18px;
+            margin-bottom: 28px;
+        }
+
+        .claim-card {
+            background: #f9fafb;
+            border: 1px solid #d1d5db;
+            border-left: 5px solid #061a33;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .pending-card {
+            border-left-color: #d97706;
+        }
+
+        .claim-heading {
+            align-items: center;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: space-between;
+        }
+
+        .claim-heading h3 {
+            margin: 0;
+        }
+
+        .pending-label,
+        .status-label {
+            border-radius: 5px;
+            display: inline-block;
+            font-size: 14px;
+            font-weight: bold;
+            padding: 6px 10px;
+        }
+
+        .pending-label {
+            background: #fef3c7;
+            color: #78350f;
+        }
+
+        .approved-label {
+            background: #dcfce7;
+            color: #14532d;
+        }
+
+        .rejected-label {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .review-button {
+            background: #061a33;
+            border-radius: 5px;
+            color: white;
+            display: inline-block;
+            font-weight: bold;
+            margin-top: 8px;
+            padding: 10px 15px;
+            text-decoration: none;
+        }
+
+        .review-button:hover {
+            background: #d4af37;
+            color: #061a33;
+        }
+
+        .empty-result {
+            background: #f9fafb;
+            border: 1px dashed #9ca3af;
+            border-radius: 8px;
+            margin-bottom: 28px;
+            padding: 20px;
+        }
+
+        .page-actions {
+            margin-top: 26px;
+        }
+    </style>
+{% endblock %}

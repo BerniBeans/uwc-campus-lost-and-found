@@ -1,0 +1,29 @@
+EMAIL NOTIFICATION SETUP
+========================
+
+The app works without email configuration. In-app notifications still work.
+If email is not configured, claim decisions are still saved normally.
+
+For Gmail SMTP, create a Google App Password for the sender account, then set
+these environment variables in the SAME PowerShell window before starting Flask.
+
+Example PowerShell configuration:
+
+$env:EMAIL_NOTIFICATIONS_ENABLED="true"
+$env:SMTP_HOST="smtp.gmail.com"
+$env:SMTP_PORT="465"
+$env:SMTP_USER="your-sender@gmail.com"
+$env:SMTP_PASSWORD="YOUR_16_CHARACTER_APP_PASSWORD"
+$env:SMTP_FROM="UWC Lost-and-Found <your-sender@gmail.com>"
+$env:SMTP_USE_SSL="true"
+$env:SMTP_USE_STARTTLS="false"
+
+Then start the app:
+
+python -m flask --app app run --debug
+
+Important:
+- Never paste the App Password into app.py or commit it to Git.
+- Environment variables disappear when that PowerShell window is closed.
+- The recipient is automatically the email address stored on the claimant's account.
+- If SMTP fails, the claim decision and in-app notification are still saved.

@@ -1,0 +1,522 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Search Items | Campus Lost and Found
+{% endblock %}
+
+{% block content %}
+    <h1>Search reported items</h1>
+
+    <p>
+        Search public lost-and-found reports. Private verification
+        details are not displayed.
+    </p>
+
+    <form method="GET" class="search-form">
+        <div class="search-grid">
+            <div class="form-group">
+                <label for="report_type">
+                    Report type
+                </label>
+
+                <select
+                    id="report_type"
+                    name="report_type"
+                >
+                    <option
+                        value="all"
+                        {% if filters.report_type == "all" %}
+                            selected
+                        {% endif %}
+                    >
+                        Lost and found items
+                    </option>
+
+                    <option
+                        value="lost"
+                        {% if filters.report_type == "lost" %}
+                            selected
+                        {% endif %}
+                    >
+                        Lost items only
+                    </option>
+
+                    <option
+                        value="found"
+                        {% if filters.report_type == "found" %}
+                            selected
+                        {% endif %}
+                    >
+                        Found items only
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="category">
+                    Category
+                </label>
+
+                <select
+                    id="category"
+                    name="category"
+                >
+                    {% for value, label in categories %}
+                        <option
+                            value="{{ value }}"
+                            {% if filters.category == value %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="colour">
+                    Colour
+                </label>
+
+                <input
+                    id="colour"
+                    name="colour"
+                    type="text"
+                    value="{{ filters.colour }}"
+                    placeholder="For example: Black"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="location">
+                    Location
+                </label>
+
+                <select
+                    id="location"
+                    name="location"
+                >
+                    {% for value, label in locations %}
+                        <option
+                            value="{{ value }}"
+                            {% if filters.location == value %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="date_from">
+                    Date from
+                </label>
+
+                <input
+                    id="date_from"
+                    name="date_from"
+                    type="date"
+                    value="{{ filters.date_from }}"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="date_to">
+                    Date to
+                </label>
+
+                <input
+                    id="date_to"
+                    name="date_to"
+                    type="date"
+                    value="{{ filters.date_to }}"
+                >
+            </div>
+
+            <div class="form-group full-width">
+                <label for="keyword">
+                    Keyword
+                </label>
+
+                <input
+                    id="keyword"
+                    name="keyword"
+                    type="text"
+                    value="{{ filters.keyword }}"
+                    placeholder="Search item name, description or brand"
+                >
+            </div>
+        </div>
+
+        <div class="search-buttons">
+            <button type="submit">
+                Search items
+            </button>
+
+            <a
+                href="{{ url_for('search_items') }}"
+                class="clear-button"
+            >
+                Clear search
+            </a>
+        </div>
+    </form>
+
+    <hr>
+
+    <div class="result-summary">
+        <strong>
+            {{ lost_items|length + found_items|length }}
+        </strong>
+        report(s) found
+    </div>
+
+    {% if filters.report_type in ["all", "lost"] %}
+        <section class="results-section">
+            <h2>
+                Lost-item reports
+                ({{ lost_items|length }})
+            </h2>
+
+            {% if lost_items %}
+                <div class="result-grid">
+                    {% for item in lost_items %}
+                        <article class="item-card lost-card">
+
+                            {% if item.image_filename %}
+                                <div class="item-image-container">
+                                    <img
+                                        src="{{ url_for(
+                                            'static',
+                                            filename='uploads/' ~ item.image_filename
+                                        ) }}"
+                                        alt="Image of {{ item.item_name }}"
+                                        class="item-image"
+                                    >
+                                </div>
+                            {% endif %}
+
+
+                            <div class="card-heading">
+                                <h3>{{ item.item_name }}</h3>
+
+                                <span class="lost-label">
+                                    Lost
+                                </span>
+                            </div>
+
+                            <p>
+                                <strong>Report:</strong>
+                                L-{{ item.id }}
+                            </p>
+
+                            <p>
+                                <strong>Category:</strong>
+                                {{
+                                    item.category
+                                    .replace("_", " ")
+                                    .title()
+                                }}
+                            </p>
+
+                            <p>
+                                <strong>Description:</strong>
+                                {{ item.description }}
+                            </p>
+
+                            <p>
+                                <strong>Colour:</strong>
+                                {{ item.colour }}
+                            </p>
+
+                            <p>
+                                <strong>Brand:</strong>
+                                {{ item.brand or "Not provided" }}
+                            </p>
+
+                            <p>
+                                <strong>Date lost:</strong>
+                                {{
+                                    item.lost_date.strftime(
+                                        "%d %B %Y"
+                                    )
+                                }}
+                            </p>
+
+                            {% if item.lost_time %}
+                                <p>
+                                    <strong>Approximate time:</strong>
+                                    {{
+                                        item.lost_time.strftime(
+                                            "%H:%M"
+                                        )
+                                    }}
+                                </p>
+                            {% endif %}
+
+                            <p>
+                                <strong>Location:</strong>
+                                {{
+                                    item.location
+                                    .replace("_", " ")
+                                    .title()
+                                }}
+                            </p>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-result">
+                    No lost-item reports matched your search.
+                </div>
+            {% endif %}
+        </section>
+    {% endif %}
+
+    {% if filters.report_type in ["all", "found"] %}
+        <section class="results-section">
+            <h2>
+                Found-item reports
+                ({{ found_items|length }})
+            </h2>
+
+            {% if found_items %}
+                <div class="result-grid">
+                    {% for item in found_items %}
+                        <article class="item-card found-card">
+                            {% if item.image_filename %}
+                                <div class="item-image-container">
+                                    <img
+                                        src="{{ url_for(
+                                            'static',
+                                            filename='uploads/' ~ item.image_filename
+                                        ) }}"
+                                        alt="Image of {{ item.item_name }}"
+                                        class="item-image"
+                                    >
+                                </div>
+                            {% endif %}
+
+                            <div class="card-heading">
+                                <h3>{{ item.item_name }}</h3>
+
+                                <span class="found-label">
+                                    Found
+                                </span>
+                            </div>
+
+                            <p>
+                                <strong>Report:</strong>
+                                F-{{ item.id }}
+                            </p>
+
+                            <p>
+                                <strong>Category:</strong>
+                                {{
+                                    item.category
+                                    .replace("_", " ")
+                                    .title()
+                                }}
+                            </p>
+
+                            <p>
+                                <strong>Description:</strong>
+                                {{ item.description }}
+                            </p>
+
+                            <p>
+                                <strong>Colour:</strong>
+                                {{ item.colour }}
+                            </p>
+
+                            <p>
+                                <strong>Brand:</strong>
+                                {{ item.brand or "Not provided" }}
+                            </p>
+
+                            <p>
+                                <strong>Date found:</strong>
+                                {{
+                                    item.found_date.strftime(
+                                        "%d %B %Y"
+                                    )
+                                }}
+                            </p>
+
+                            {% if item.found_time %}
+                                <p>
+                                    <strong>Approximate time:</strong>
+                                    {{
+                                        item.found_time.strftime(
+                                            "%H:%M"
+                                        )
+                                    }}
+                                </p>
+                            {% endif %}
+
+                            <p>
+                                <strong>Location found:</strong>
+                                {{
+                                    item.location
+                                    .replace("_", " ")
+                                    .title()
+                                }}
+                            </p>
+
+                            <p>
+                                <strong>Storage location:</strong>
+                                {{
+                                    item.storage_location
+                                    .replace("_", " ")
+                                    .title()
+                                }}
+                            </p>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-result">
+                    No found-item reports matched your search.
+                </div>
+            {% endif %}
+        </section>
+    {% endif %}
+
+    <p>
+        <a href="{{ url_for('dashboard') }}">
+            Return to dashboard
+        </a>
+    </p>
+
+  <style>
+    .search-form {
+        background: #f9fafb;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        margin: 24px 0;
+        padding: 20px;
+    }
+
+    .search-grid {
+        display: grid;
+        gap: 16px;
+        grid-template-columns:
+            repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .full-width {
+        grid-column: 1 / -1;
+    }
+
+    .search-buttons {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 6px;
+    }
+
+    .clear-button {
+        background: #e5e7eb;
+        border: 2px solid #d1d5db;
+        border-radius: 4px;
+        color: #111827;
+        font-weight: bold;
+        padding: 12px 20px;
+        text-decoration: none;
+    }
+
+    .clear-button:hover {
+        background: #d1d5db;
+    }
+
+    .result-summary {
+        background: #eff6ff;
+        border-left: 4px solid #2563eb;
+        margin: 20px 0;
+        padding: 12px 16px;
+    }
+
+    .results-section {
+        margin-bottom: 32px;
+    }
+
+    .result-grid {
+        display: grid;
+        gap: 18px;
+    }
+
+    .item-card {
+        background: #ffffff;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 20px;
+    }
+
+    .lost-card {
+        border-left: 5px solid #dc2626;
+    }
+
+    .found-card {
+        border-left: 5px solid #16a34a;
+    }
+
+    .card-heading {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        justify-content: space-between;
+    }
+
+    .card-heading h3 {
+        margin: 0;
+    }
+
+    .lost-label,
+    .found-label {
+        border-radius: 5px;
+        font-size: 14px;
+        font-weight: bold;
+        padding: 6px 10px;
+    }
+
+    .lost-label {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .found-label {
+        background: #dcfce7;
+        color: #14532d;
+    }
+
+    .empty-result {
+        background: #f9fafb;
+        border: 1px dashed #9ca3af;
+        border-radius: 8px;
+        color: #4b5563;
+        padding: 20px;
+    }
+
+    /* Item image styling */
+    .item-image-container {
+        margin-bottom: 18px;
+        text-align: center;
+    }
+
+    .item-image {
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        display: block;
+        height: 220px;
+        margin: 0 auto;
+        max-width: 100%;
+        object-fit: contain;
+        width: 100%;
+    }
+</style>
+{% endblock %}

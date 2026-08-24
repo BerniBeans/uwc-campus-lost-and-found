@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Report Lost Item | Campus Lost and Found
+{% endblock %}
+
+{% block content %}
+    <h1>Report a lost item</h1>
+
+    <p>
+        Enter as much accurate information as possible.
+        Private identifying details will not appear in public searches.
+    </p>
+
+    <form
+        method="POST"
+        enctype="multipart/form-data"
+    >
+        {{ form.hidden_tag() }}
+
+        <div class="form-group">
+            {{ form.category.label }}
+            {{ form.category() }}
+
+            {% for error in form.category.errors %}
+                <div class="error-text">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            {{ form.item_name.label }}
+
+            {{ form.item_name(
+                placeholder="For example: Black leather wallet"
+            ) }}
+
+            {% for error in form.item_name.errors %}
+                <div class="error-text">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            {{ form.description.label }}
+
+            {{ form.description(
+                rows="5",
+                placeholder="Describe the item without revealing every private detail."
+            ) }}
+
+            {% for error in form.description.errors %}
+                <div class="error-text">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            {{ form.colour.label }}
+
+            {{ form.colour(
+                placeholder="For example: Black"
+            ) }}
+
+            {% for error in form.colour.errors %}
+                <div class="error-text">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            {{ form.brand.label }}
+
+            {{ form.brand(
+                placeholder="For example: Samsung, Nike or Dell"
+            ) }}
+
+            {% for error in form.brand.errors %}
+                <div class="error-text">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            {{ form.lost_date.label }}
+            {{ form.lost_date() }}
+
+            {% for error in form.lost_date.errors %}
+                <div class="error-text">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            {{ form.lost_time.label }}
+            {{ form.lost_time() }}
+
+            {% for error in form.lost_time.errors %}
+                <div class="error-text">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            {{ form.location.label }}
+            {{ form.location() }}
+
+            {% for error in form.location.errors %}
+                <div class="error-text">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            {{ form.image.label }}
+
+            {{ form.image(
+                accept=".jpg,.jpeg,.png,.webp"
+            ) }}
+
+            {% for error in form.image.errors %}
+                <div class="error-text">
+                    {{ error }}
+                </div>
+            {% endfor %}
+
+            <small>
+                Optional. JPG, JPEG, PNG or WEBP.
+                Maximum request size: 5 MB.
+            </small>
+        </div>
+
+        <div class="form-group">
+            {{ form.private_details.label }}
+
+            {{ form.private_details(
+                rows="4",
+                placeholder="For example: Contents, serial number, marks or damage only the owner would know."
+            ) }}
+
+            {% for error in form.private_details.errors %}
+                <div class="error-text">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </div>
+
+        {{ form.submit() }}
+    </form>
+{% endblock %}

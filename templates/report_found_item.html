@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Report Found Item | Campus Lost and Found
+{% endblock %}
+
+{% block content %}
+    <h1>Report a found item</h1>
+
+    <p>
+        Enter information about the item you found. Do not reveal
+        every identifying detail publicly, because private details
+        can help verify the correct owner.
+    </p>
+
+    <form
+        method="POST"
+        enctype="multipart/form-data"
+    >
+        {{ form.hidden_tag() }}
+
+        <div class="form-group">
+            {{ form.category.label }}
+            {{ form.category() }}
+
+            {% for error in form.category.errors %}
+                <div class="error-text">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            {{ form.item_name.label }}
+
+            {{ form.item_name(
+                placeholder="For example: Black leather wallet"
+            ) }}
+
+            {% for error in form.item_name.errors %}
+                <div class="error-text">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            {{ form.description.label }}
+
+            {{ form.description(
+                rows="5",
+                placeholder="Describe the item without revealing all private identifying details."
+            ) }}
+
+            {% for error in form.description.errors %}
+                <div class="error-text">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            {{ form.colour.label }}
+
+            {{ form.colour(
+                placeholder="For example: Black"
+            ) }}
+
+            {% for error in form.colour.errors %}
+                <div class="error-text">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            {{ form.brand.label }}
+
+            {{ form.brand(
+                placeholder="For example: Samsung, Nike or Dell"
+            ) }}
+
+            {% for error in form.brand.errors %}
+                <div class="error-text">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            {{ form.found_date.label }}
+            {{ form.found_date() }}
+
+            {% for error in form.found_date.errors %}
+                <div class="error-text">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            {{ form.found_time.label }}
+            {{ form.found_time() }}
+
+            {% for error in form.found_time.errors %}
+                <div class="error-text">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            {{ form.location.label }}
+            {{ form.location() }}
+
+            {% for error in form.location.errors %}
+                <div class="error-text">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            {{ form.image.label }}
+
+            {{ form.image(
+                accept=".jpg,.jpeg,.png,.webp"
+            ) }}
+
+            {% for error in form.image.errors %}
+                <div class="error-text">
+                    {{ error }}
+                </div>
+            {% endfor %}
+
+            <small>
+                Optional. JPG, JPEG, PNG or WEBP.
+                Maximum request size: 5 MB.
+            </small>
+        </div>
+
+        <div class="form-group">
+            {{ form.private_details.label }}
+
+            {{ form.private_details(
+                rows="4",
+                placeholder="Enter hidden contents, marks, serial numbers or damage that may help verify the owner."
+            ) }}
+
+            {% for error in form.private_details.errors %}
+                <div class="error-text">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            {{ form.storage_location.label }}
+            {{ form.storage_location() }}
+
+            {% for error in form.storage_location.errors %}
+                <div class="error-text">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </div>
+
+        {{ form.submit() }}
+    </form>
+
+    <p>
+        <a href="{{ url_for('dashboard') }}">
+            Return to dashboard
+        </a>
+    </p>
+{% endblock %}

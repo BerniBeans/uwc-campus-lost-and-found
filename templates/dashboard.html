@@ -1,0 +1,294 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Dashboard | Campus Lost and Found
+{% endblock %}
+
+{% block content %}
+    <h1>Student dashboard</h1>
+
+    <p>
+        Welcome,
+        <strong>
+            {{ current_user.first_name }}
+            {{ current_user.surname }}
+        </strong>.
+    </p>
+
+    {% if unread_notifications %}
+        <section class="notification-area">
+            <h2>New notifications</h2>
+
+            {% for notification in unread_notifications %}
+                <article
+                    class="notification-card notification-{{ notification.category }}"
+                >
+                    <div class="notification-content">
+                        <h3>{{ notification.title }}</h3>
+                        <p>{{ notification.message }}</p>
+
+                        <small>
+                            {{
+                                notification.created_at.strftime(
+                                    "%d %B %Y at %H:%M"
+                                )
+                            }}
+                        </small>
+                    </div>
+
+                    <form
+                        method="POST"
+                        action="{{
+                            url_for(
+                                'mark_notification_read',
+                                notification_id=notification.id
+                            )
+                        }}"
+                        class="notification-form"
+                    >
+                        {{ notification_read_form.hidden_tag() }}
+
+                        <button
+                            type="submit"
+                            class="notification-button"
+                        >
+                            Mark as read
+                        </button>
+                    </form>
+                </article>
+            {% endfor %}
+        </section>
+    {% endif %}
+
+    <div class="user-details">
+        <p>
+            <strong>Student number:</strong>
+            {{ current_user.student_number }}
+        </p>
+
+        <p>
+            <strong>Email:</strong>
+            {{ current_user.email }}
+        </p>
+
+        <p>
+            <strong>Account role:</strong>
+            {{ current_user.role.title() }}
+        </p>
+    </div>
+
+    <hr>
+
+    <h2>Lost-and-found services</h2>
+
+    <div class="service-links">
+        <a
+            href="{{ url_for('report_lost_item') }}"
+            class="service-card active-service"
+        >
+            <h3>Report a lost item</h3>
+
+            <p>
+                Submit information about an item that you lost
+                on campus.
+            </p>
+        </a>
+
+        <a
+            href="{{ url_for('report_found_item') }}"
+            class="service-card active-service"
+        >
+            <h3>Report a found item</h3>
+
+            <p>
+                Record an item that you found on campus and
+                indicate where it is being stored.
+            </p>
+        </a>
+
+        <a
+            href="{{ url_for('search_items') }}"
+            class="service-card active-service"
+        >
+            <h3>Search reported items</h3>
+
+            <p>
+                Search lost and found reports by category,
+                colour, date, keyword or location.
+            </p>
+        </a>
+
+        <a
+            href="{{ url_for('possible_matches') }}"
+            class="service-card active-service"
+        >
+            <h3>View possible matches</h3>
+
+            <p>
+                View found items that may match one of your
+                lost-item reports.
+            </p>
+        </a>
+
+        <a
+            href="{{ url_for('submit_claim') }}"
+            class="service-card active-service"
+        >
+            <h3>Submit an ownership claim</h3>
+
+            <p>
+                Provide private identifying information to claim
+                a reported found item.
+            </p>
+        </a>
+
+        {% if current_user.role == "ADMIN" %}
+            <a
+                href="{{ url_for('admin_claims') }}"
+                class="service-card admin-service"
+            >
+                <h3>Review ownership claims</h3>
+
+                <p>
+                    Review pending claims and approve or reject
+                    ownership requests.
+                </p>
+            </a>
+        {% endif %}
+    </div>
+
+    <style>
+        .notification-area {
+            margin: 22px 0;
+        }
+
+        .notification-area h2 {
+            margin-bottom: 12px;
+        }
+
+        .notification-card {
+            align-items: flex-start;
+            background: #eff6ff;
+            border: 1px solid #93c5fd;
+            border-left: 5px solid #2563eb;
+            border-radius: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding: 16px;
+        }
+
+        .notification-success {
+            background: #f0fdf4;
+            border-color: #86efac;
+            border-left-color: #16a34a;
+        }
+
+        .notification-error {
+            background: #fef2f2;
+            border-color: #fecaca;
+            border-left-color: #dc2626;
+        }
+
+        .notification-content {
+            flex: 1 1 420px;
+        }
+
+        .notification-content h3 {
+            margin: 0 0 8px;
+        }
+
+        .notification-content p {
+            margin: 0 0 8px;
+        }
+
+        .notification-content small {
+            color: #4b5563;
+        }
+
+        .notification-form {
+            margin: 0;
+        }
+
+        .notification-button {
+            padding: 9px 13px;
+        }
+
+        .user-details {
+            background: #f9fafb;
+            border-left: 4px solid #061a33;
+            margin: 20px 0;
+            padding: 10px 16px;
+        }
+
+        .user-details p {
+            margin: 10px 0;
+        }
+
+        .service-links {
+            display: grid;
+            gap: 16px;
+            grid-template-columns:
+                repeat(auto-fit, minmax(240px, 1fr));
+            margin-top: 20px;
+        }
+
+        .service-card {
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            display: block;
+            min-height: 150px;
+            padding: 18px;
+            transition:
+                background-color 0.2s ease,
+                border-color 0.2s ease,
+                transform 0.2s ease;
+        }
+
+        .service-card h3 {
+            margin-top: 0;
+        }
+
+        .service-card p {
+            line-height: 1.4;
+        }
+
+        .active-service {
+            background: #eff6ff;
+            border-color: #2563eb;
+            color: #111827;
+            text-decoration: none;
+        }
+
+        .active-service:hover {
+            background: #dbeafe;
+            border-color: #1d4ed8;
+            transform: translateY(-2px);
+        }
+
+        .admin-service {
+            background: #fef3c7;
+            border: 2px solid #d4af37;
+            color: #111827;
+            text-decoration: none;
+        }
+
+        .admin-service:hover {
+            background: #fde68a;
+            border-color: #b8860b;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 600px) {
+            .service-links {
+                grid-template-columns: 1fr;
+            }
+
+            .service-card {
+                min-height: auto;
+            }
+        }
+    </style>
+{% endblock %}

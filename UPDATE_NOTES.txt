@@ -1,0 +1,35 @@
+UPDATE: CLAIM NOTIFICATIONS + EMAIL + IMAGE DISPLAY
+===================================================
+
+Added in this version:
+- Persistent in-app notifications when an ownership claim is approved/rejected.
+- Unread notifications appear on the claimant's dashboard after login.
+- "Mark as read" action for dashboard notifications.
+- Optional SMTP email for approved/rejected claims.
+- Claim decisions still save even when SMTP is disabled or fails.
+- Automatic-rejection notifications for competing pending claims after approval.
+- Lost/found images displayed side-by-side on Possible Matches.
+- Found-item image displayed on Admin Claim Review.
+- Found-item images added to Search results too.
+- New notifications database table and migration.
+
+DATABASE
+--------
+The database included in this ZIP has already been upgraded to revision:
+6a3e9b1c4d20
+
+If these files are copied into another project/database instead, run:
+python -m flask --app app db upgrade
+
+EMAIL
+-----
+Email is optional. The app runs normally without SMTP configuration.
+See SMTP_SETUP.txt for the PowerShell environment variables required for Gmail.
+
+BASIC TEST
+----------
+1. Student account submits an ownership claim.
+2. Admin account reviews and approves/rejects it.
+3. Student logs in and sees the notification on the dashboard.
+4. Student clicks "Mark as read".
+5. If SMTP is configured, the student's registered email also receives the result.

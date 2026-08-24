@@ -1,0 +1,277 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Review Claim C-{{ claim.id }} | Campus Lost and Found
+{% endblock %}
+
+{% block content %}
+    <h1>Review ownership claim C-{{ claim.id }}</h1>
+
+    <div class="status-box">
+        <strong>Current status:</strong>
+        {{ claim.status.title() }}
+    </div>
+
+    <div class="review-grid">
+        <section class="detail-card">
+            <h2>Claimant information</h2>
+
+            <p>
+                <strong>Name:</strong>
+                {{ claim.claimant.first_name }}
+                {{ claim.claimant.surname }}
+            </p>
+
+            <p>
+                <strong>Student number:</strong>
+                {{ claim.claimant.student_number }}
+            </p>
+
+            <p>
+                <strong>Email:</strong>
+                {{ claim.claimant.email }}
+            </p>
+
+            <p>
+                <strong>Claim submitted:</strong>
+                {{
+                    claim.created_at.strftime(
+                        "%d %B %Y at %H:%M"
+                    )
+                }}
+            </p>
+        </section>
+
+        <section class="detail-card found-details">
+            <h2>Found-item report</h2>
+
+            {% if claim.found_item.image_filename %}
+                <img
+                    src="{{ url_for(
+                        'static',
+                        filename='uploads/' ~ claim.found_item.image_filename
+                    ) }}"
+                    alt="Found item: {{ claim.found_item.item_name }}"
+                    class="review-item-image"
+                >
+            {% endif %}
+
+            <p>
+                <strong>Report:</strong>
+                F-{{ claim.found_item.id }}
+            </p>
+
+            <p>
+                <strong>Item:</strong>
+                {{ claim.found_item.item_name }}
+            </p>
+
+            <p>
+                <strong>Category:</strong>
+                {{
+                    claim.found_item.category
+                    .replace("_", " ")
+                    .title()
+                }}
+            </p>
+
+            <p>
+                <strong>Description:</strong>
+                {{ claim.found_item.description }}
+            </p>
+
+            <p>
+                <strong>Colour:</strong>
+                {{ claim.found_item.colour }}
+            </p>
+
+            <p>
+                <strong>Brand:</strong>
+                {{ claim.found_item.brand or "Not provided" }}
+            </p>
+
+            <p>
+                <strong>Date found:</strong>
+                {{
+                    claim.found_item.found_date.strftime(
+                        "%d %B %Y"
+                    )
+                }}
+            </p>
+
+            <p>
+                <strong>Location:</strong>
+                {{
+                    claim.found_item.location
+                    .replace("_", " ")
+                    .title()
+                }}
+            </p>
+
+            <p>
+                <strong>Storage location:</strong>
+                {{
+                    claim.found_item.storage_location
+                    .replace("_", " ")
+                    .title()
+                }}
+            </p>
+        </section>
+    </div>
+
+    <section class="private-card">
+        <h2>Finder’s private verification details</h2>
+
+        <p>
+            {{ claim.found_item.private_details }}
+        </p>
+    </section>
+
+    <section class="private-card claimant-details">
+        <h2>Claimant’s ownership details</h2>
+
+        <p>
+            {{ claim.ownership_details }}
+        </p>
+    </section>
+
+    {% if claim.status == "PENDING" %}
+        <form method="POST" class="review-form">
+            {{ form.hidden_tag() }}
+
+            <div class="form-group">
+                {{ form.decision.label }}
+                {{ form.decision() }}
+
+                {% for error in form.decision.errors %}
+                    <div class="error-text">
+                        {{ error }}
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                {{ form.review_notes.label }}
+
+                {{ form.review_notes(
+                    rows="5",
+                    placeholder=(
+                        "Explain the decision, especially when "
+                        "rejecting a claim."
+                    )
+                ) }}
+
+                {% for error in form.review_notes.errors %}
+                    <div class="error-text">
+                        {{ error }}
+                    </div>
+                {% endfor %}
+            </div>
+
+            {{ form.submit() }}
+        </form>
+    {% else %}
+        <section class="reviewed-box">
+            <h2>Review decision</h2>
+
+            <p>
+                <strong>Decision:</strong>
+                {{ claim.status.title() }}
+            </p>
+
+            <p>
+                <strong>Review notes:</strong>
+                {{ claim.review_notes or "No notes provided" }}
+            </p>
+        </section>
+    {% endif %}
+
+    <p class="page-actions">
+        <a href="{{ url_for('admin_claims') }}">
+            Return to claim administration
+        </a>
+
+        <a href="{{ url_for('dashboard') }}">
+            Return to dashboard
+        </a>
+    </p>
+
+    <style>
+        .status-box {
+            background: #eff6ff;
+            border-left: 4px solid #2563eb;
+            margin: 20px 0;
+            padding: 14px 16px;
+        }
+
+        .review-grid {
+            display: grid;
+            gap: 18px;
+            grid-template-columns:
+                repeat(auto-fit, minmax(260px, 1fr));
+        }
+
+        .detail-card {
+            background: #f9fafb;
+            border-left: 5px solid #061a33;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .found-details {
+            border-left-color: #16a34a;
+        }
+
+        .review-item-image {
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            display: block;
+            height: 240px;
+            margin: 12px auto 18px;
+            max-width: 100%;
+            object-fit: contain;
+            width: 100%;
+        }
+
+        .detail-card h2,
+        .private-card h2 {
+            margin-top: 0;
+        }
+
+        .private-card {
+            background: #fef3c7;
+            border-left: 5px solid #d97706;
+            border-radius: 8px;
+            margin-top: 20px;
+            padding: 20px;
+        }
+
+        .claimant-details {
+            background: #eff6ff;
+            border-left-color: #2563eb;
+        }
+
+        .review-form {
+            background: #f9fafb;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            margin-top: 22px;
+            padding: 20px;
+        }
+
+        .reviewed-box {
+            background: #f9fafb;
+            border-left: 5px solid #061a33;
+            margin-top: 22px;
+            padding: 20px;
+        }
+
+        .page-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+            margin-top: 26px;
+        }
+    </style>
+{% endblock %}

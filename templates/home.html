@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Home | Campus Lost and Found
+{% endblock %}
+
+{% block content %}
+    <h1>Campus Lost-and-Found System</h1>
+
+    <p>
+        Report lost items, report found items and submit
+        ownership claims.
+    </p>
+
+    <p>
+        <a href="{{ url_for('register') }}">
+            Create an account
+        </a>
+    </p>
+{% endblock %}

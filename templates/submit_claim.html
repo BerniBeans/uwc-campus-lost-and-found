@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Submit Ownership Claim | Campus Lost and Found
+{% endblock %}
+
+{% block content %}
+    <h1>Submit an ownership claim</h1>
+
+    <p>
+        Select a found-item report and provide private
+        information that can help verify that the item
+        belongs to you.
+    </p>
+
+    <div class="privacy-notice">
+        <strong>Important:</strong>
+
+        Your ownership details will not appear in public
+        search results. Do not include passwords, PINs or
+        banking login information.
+    </div>
+
+    {% if available_items %}
+        <form method="POST">
+            {{ form.hidden_tag() }}
+
+            <div class="form-group">
+                {{ form.found_item_id.label }}
+                {{ form.found_item_id() }}
+
+                {% for error in form.found_item_id.errors %}
+                    <div class="error-text">
+                        {{ error }}
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                {{ form.ownership_details.label }}
+
+                {{ form.ownership_details(
+                    rows="7",
+                    placeholder=(
+                        "Describe information only the real "
+                        "owner is likely to know. For example: "
+                        "contents, marks, scratches, stickers, "
+                        "serial-number fragments or other "
+                        "identifying features."
+                    )
+                ) }}
+
+                {% for error in form.ownership_details.errors %}
+                    <div class="error-text">
+                        {{ error }}
+                    </div>
+                {% endfor %}
+
+                <p class="field-help">
+                    Enter at least 20 characters. Do not copy
+                    only the public description.
+                </p>
+            </div>
+
+            <div class="form-group declaration-group">
+                {{ form.declaration() }}
+                {{ form.declaration.label }}
+
+                {% for error in form.declaration.errors %}
+                    <div class="error-text">
+                        {{ error }}
+                    </div>
+                {% endfor %}
+            </div>
+
+            {{ form.submit() }}
+        </form>
+    {% else %}
+        <div class="empty-result">
+            <h2>No available found items</h2>
+
+            <p>
+                There are currently no found-item reports
+                available for you to claim.
+            </p>
+
+            <a href="{{ url_for('search_items') }}">
+                Search reported items
+            </a>
+        </div>
+    {% endif %}
+
+    <div class="page-actions">
+        <a href="{{ url_for('possible_matches') }}">
+            View possible matches
+        </a>
+
+        <a href="{{ url_for('search_items') }}">
+            Search reported items
+        </a>
+
+        <a href="{{ url_for('dashboard') }}">
+            Return to dashboard
+        </a>
+    </div>
+
+    <style>
+        .privacy-notice {
+            background: #fef3c7;
+            border-left: 4px solid #d97706;
+            border-radius: 5px;
+            color: #78350f;
+            margin: 20px 0;
+            padding: 15px 17px;
+        }
+
+        .field-help {
+            color: #6b7280;
+            font-size: 14px;
+            margin-top: 6px;
+        }
+
+        .declaration-group {
+            align-items: flex-start;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+        }
+
+        .declaration-group label {
+            display: inline;
+            font-weight: normal;
+            margin: 0;
+        }
+
+        .declaration-group .error-text {
+            flex-basis: 100%;
+        }
+
+        .empty-result {
+            background: #f9fafb;
+            border: 1px dashed #9ca3af;
+            border-radius: 8px;
+            margin: 24px 0;
+            padding: 22px;
+        }
+
+        .page-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+            margin-top: 26px;
+        }
+    </style>
+{% endblock %}

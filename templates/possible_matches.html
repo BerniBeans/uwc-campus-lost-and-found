@@ -1,0 +1,440 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Possible Matches | Campus Lost and Found
+{% endblock %}
+
+{% block content %}
+    <h1>Possible matches</h1>
+
+    <p>
+        These results compare your active lost-item reports with
+        available found-item reports.
+    </p>
+
+    <div class="privacy-notice">
+        Private verification details are not displayed. A possible
+        match does not automatically prove ownership.
+    </div>
+
+    {% if not lost_items %}
+        <div class="empty-result">
+            <h2>No lost-item reports</h2>
+
+            <p>
+                You must submit a lost-item report before the
+                system can calculate possible matches.
+            </p>
+
+            <a
+                href="{{ url_for('report_lost_item') }}"
+                class="action-button"
+            >
+                Report a lost item
+            </a>
+        </div>
+
+    {% elif not matches %}
+        <div class="empty-result">
+            <h2>No possible matches found</h2>
+
+            <p>
+                None of the current found-item reports reached the
+                minimum matching score for your lost items.
+            </p>
+
+            <p>
+                New reports may produce possible matches later.
+            </p>
+        </div>
+
+    {% else %}
+        <div class="match-summary">
+            <strong>{{ matches|length }}</strong>
+            possible match(es) found
+        </div>
+
+        <div class="match-list">
+            {% for match in matches %}
+                <article class="match-card">
+                    <div class="match-heading">
+                        <h2>
+                            {{ match.lost_item.item_name }}
+                            ↔
+                            {{ match.found_item.item_name }}
+                        </h2>
+
+                        <span
+                            class="
+                                match-score
+                                {% if match.score >= 85 %}
+                                    high-score
+                                {% elif match.score >= 70 %}
+                                    medium-score
+                                {% else %}
+                                    possible-score
+                                {% endif %}
+                            "
+                        >
+                            {{ match.score }}% match
+                        </span>
+                    </div>
+
+                    <div class="comparison-grid">
+                        <section class="lost-section">
+                            <h3>Lost report</h3>
+
+                            {% if match.lost_item.image_filename %}
+                                <img
+                                    src="{{ url_for(
+                                        'static',
+                                        filename='uploads/' ~ match.lost_item.image_filename
+                                    ) }}"
+                                    alt="Lost item: {{ match.lost_item.item_name }}"
+                                    class="match-item-image"
+                                >
+                            {% endif %}
+
+                            <p>
+                                <strong>Report:</strong>
+                                L-{{ match.lost_item.id }}
+                            </p>
+
+                            <p>
+                                <strong>Item:</strong>
+                                {{ match.lost_item.item_name }}
+                            </p>
+
+                            <p>
+                                <strong>Category:</strong>
+                                {{
+                                    match.lost_item.category
+                                    .replace("_", " ")
+                                    .title()
+                                }}
+                            </p>
+
+                            <p>
+                                <strong>Description:</strong>
+                                {{ match.lost_item.description }}
+                            </p>
+
+                            <p>
+                                <strong>Colour:</strong>
+                                {{ match.lost_item.colour }}
+                            </p>
+
+                            <p>
+                                <strong>Brand:</strong>
+                                {{
+                                    match.lost_item.brand
+                                    or "Not provided"
+                                }}
+                            </p>
+
+                            <p>
+                                <strong>Date lost:</strong>
+                                {{
+                                    match.lost_item.lost_date
+                                    .strftime("%d %B %Y")
+                                }}
+                            </p>
+
+                            <p>
+                                <strong>Location:</strong>
+                                {{
+                                    match.lost_item.location
+                                    .replace("_", " ")
+                                    .title()
+                                }}
+                            </p>
+                        </section>
+
+                        <section class="found-section">
+                            <h3>Found report</h3>
+
+                            {% if match.found_item.image_filename %}
+                                <img
+                                    src="{{ url_for(
+                                        'static',
+                                        filename='uploads/' ~ match.found_item.image_filename
+                                    ) }}"
+                                    alt="Found item: {{ match.found_item.item_name }}"
+                                    class="match-item-image"
+                                >
+                            {% endif %}
+
+                            <p>
+                                <strong>Report:</strong>
+                                F-{{ match.found_item.id }}
+                            </p>
+
+                            <p>
+                                <strong>Item:</strong>
+                                {{ match.found_item.item_name }}
+                            </p>
+
+                            <p>
+                                <strong>Category:</strong>
+                                {{
+                                    match.found_item.category
+                                    .replace("_", " ")
+                                    .title()
+                                }}
+                            </p>
+
+                            <p>
+                                <strong>Description:</strong>
+                                {{ match.found_item.description }}
+                            </p>
+
+                            <p>
+                                <strong>Colour:</strong>
+                                {{ match.found_item.colour }}
+                            </p>
+
+                            <p>
+                                <strong>Brand:</strong>
+                                {{
+                                    match.found_item.brand
+                                    or "Not provided"
+                                }}
+                            </p>
+
+                            <p>
+                                <strong>Date found:</strong>
+                                {{
+                                    match.found_item.found_date
+                                    .strftime("%d %B %Y")
+                                }}
+                            </p>
+
+                            <p>
+                                <strong>Location found:</strong>
+                                {{
+                                    match.found_item.location
+                                    .replace("_", " ")
+                                    .title()
+                                }}
+                            </p>
+
+                            <p>
+                                <strong>Storage location:</strong>
+                                {{
+                                    match.found_item.storage_location
+                                    .replace("_", " ")
+                                    .title()
+                                }}
+                            </p>
+                        </section>
+                    </div>
+
+                    <div class="match-reasons">
+                        <h3>Why this may be a match</h3>
+
+                        <ul>
+                            {% for reason in match.reasons %}
+                                <li>{{ reason }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                    <div class="claim-action">
+                        <a
+                            href="{{
+                                url_for(
+                                    'submit_claim',
+                                    found_item_id=match.found_item.id
+                                )
+                            }}"
+                            class="claim-button"
+                        >
+                            Submit ownership claim
+                        </a>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="page-actions">
+        <a href="{{ url_for('dashboard') }}">
+            Return to dashboard
+        </a>
+
+        <a href="{{ url_for('search_items') }}">
+            Search all reports
+        </a>
+    </div>
+
+    <style>
+        .privacy-notice {
+            background: #fef3c7;
+            border-left: 4px solid #d97706;
+            border-radius: 4px;
+            color: #78350f;
+            margin: 20px 0;
+            padding: 14px 16px;
+        }
+
+        .match-summary {
+            background: #eff6ff;
+            border-left: 4px solid #2563eb;
+            margin: 20px 0;
+            padding: 14px 16px;
+        }
+
+        .match-list {
+            display: grid;
+            gap: 24px;
+        }
+
+        .match-card {
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            padding: 22px;
+        }
+
+        .match-heading {
+            align-items: center;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            justify-content: space-between;
+        }
+
+        .match-heading h2 {
+            margin: 0;
+        }
+
+        .match-score {
+            border-radius: 6px;
+            display: inline-block;
+            font-weight: bold;
+            padding: 8px 12px;
+        }
+
+        .high-score {
+            background: #dcfce7;
+            color: #14532d;
+        }
+
+        .medium-score {
+            background: #dbeafe;
+            color: #1e3a8a;
+        }
+
+        .possible-score {
+            background: #fef3c7;
+            color: #78350f;
+        }
+
+        .comparison-grid {
+            display: grid;
+            gap: 18px;
+            grid-template-columns:
+                repeat(auto-fit, minmax(250px, 1fr));
+            margin-top: 20px;
+        }
+
+        .lost-section,
+        .found-section {
+            border-radius: 8px;
+            padding: 18px;
+        }
+
+        .lost-section {
+            background: #fef2f2;
+            border-left: 5px solid #dc2626;
+        }
+
+        .found-section {
+            background: #f0fdf4;
+            border-left: 5px solid #16a34a;
+        }
+
+        .lost-section h3,
+        .found-section h3 {
+            margin-top: 0;
+        }
+
+        .match-item-image {
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            display: block;
+            height: 220px;
+            margin: 12px auto 18px;
+            max-width: 100%;
+            object-fit: contain;
+            width: 100%;
+        }
+
+        .match-reasons {
+            background: #f9fafb;
+            border-radius: 8px;
+            margin-top: 18px;
+            padding: 16px;
+        }
+
+        .match-reasons h3 {
+            margin-top: 0;
+        }
+
+        .match-reasons ul {
+            margin-bottom: 0;
+        }
+
+        .claim-action {
+            margin-top: 18px;
+        }
+
+        .claim-button {
+            background: #061a33;
+            border: 2px solid #061a33;
+            border-radius: 5px;
+            color: white;
+            display: inline-block;
+            font-weight: bold;
+            padding: 11px 16px;
+            text-decoration: none;
+        }
+
+        .claim-button:hover {
+            background: #d4af37;
+            border-color: #d4af37;
+            color: #061a33;
+        }
+
+        .empty-result {
+            background: #f9fafb;
+            border: 1px dashed #9ca3af;
+            border-radius: 8px;
+            margin: 24px 0;
+            padding: 24px;
+        }
+
+        .action-button {
+            background: #061a33;
+            border-radius: 5px;
+            color: white;
+            display: inline-block;
+            font-weight: bold;
+            padding: 11px 16px;
+            text-decoration: none;
+        }
+
+        .action-button:hover {
+            background: #d4af37;
+            color: #061a33;
+        }
+
+        .page-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+            margin-top: 28px;
+        }
+    </style>
+{% endblock %}

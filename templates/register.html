@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Register | Campus Lost and Found
+{% endblock %}
+
+{% block content %}
+    <h1>Create an account</h1>
+
+    <form method="POST">
+        {{ form.hidden_tag() }}
+
+        <div class="form-group">
+            {{ form.student_number.label }}
+            {{ form.student_number() }}
+
+            {% for error in form.student_number.errors %}
+                <div class="error-text">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            {{ form.first_name.label }}
+            {{ form.first_name() }}
+
+            {% for error in form.first_name.errors %}
+                <div class="error-text">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            {{ form.surname.label }}
+            {{ form.surname() }}
+
+            {% for error in form.surname.errors %}
+                <div class="error-text">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            {{ form.email.label }}
+            {{ form.email() }}
+
+            {% for error in form.email.errors %}
+                <div class="error-text">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            {{ form.password.label }}
+            {{ form.password() }}
+
+            {% for error in form.password.errors %}
+                <div class="error-text">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            {{ form.confirm_password.label }}
+            {{ form.confirm_password() }}
+
+            {% for error in form.confirm_password.errors %}
+                <div class="error-text">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </div>
+
+        {{ form.submit() }}
+    </form>
+{% endblock %}

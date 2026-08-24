@@ -1,0 +1,21 @@
+# Python virtual environment
+.venv/
+
+# Python temporary files
+__pycache__/
+*.pyc
+
+# Local database and instance files
+instance/
+
+# Environment variables
+.env
+
+# VS Code local settings
+.vscode/
+
+#migrations folder not here we must share it through git with team
+# User-uploaded item images
+static/uploads/*
+!static/uploads/.gitkeep
+
