@@ -1,6 +1,8 @@
 from datetime import date
 from email.message import EmailMessage
 import os
+import secrets
+import shutil
 import smtplib
 import ssl
 from pathlib import Path
@@ -14,6 +16,7 @@ from flask import (
     redirect,
     render_template,
     request,
+    send_from_directory,
     url_for,
 )
 
@@ -53,6 +56,11 @@ from models import (
     OwnershipClaim,
     User,
 )
+
+
+# Do not display ID documents or wallet photographs in the public item feed.
+SENSITIVE_IMAGE_CATEGORIES = {"IDENTIFICATION", "STUDENT_CARD", "WALLET"}
+IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
 
 
 # ---------------------------------------------------------
@@ -232,30 +240,47 @@ def calculate_match_score(
         )
 
     return min(score, 100), reasons
-def save_uploaded_image(
-    file_storage,
-    upload_folder: Path,
-) -> str | None:
-    """Save an uploaded item image and return its stored filename."""
-
+def save_uploaded_image(file_storage, upload_folder: Path) -> str | None:
+    """Save verified image bytes outside Flask's public static directory."""
     if file_storage is None or not file_storage.filename:
         return None
 
     original_filename = secure_filename(file_storage.filename)
-
-    if not original_filename:
-        return None
-
     extension = Path(original_filename).suffix.lower()
+    if extension not in IMAGE_EXTENSIONS:
+        raise ValueError("Only JPG, JPEG, PNG and WEBP images are allowed.")
 
-    if extension not in {".jpg", ".jpeg", ".png", ".webp"}:
-        return None
+    # File extension validation alone is not sufficient: verify basic
+    # signature bytes without pulling in a separate image library.
+    signature = file_storage.stream.read(12)
+    file_storage.stream.seek(0)
+    valid_image = (
+        (extension in {".jpg", ".jpeg"} and signature.startswith(b"\xff\xd8\xff"))
+        or (extension == ".png" and signature.startswith(b"\x89PNG\r\n\x1a\n"))
+        or (
+            extension == ".webp"
+            and signature.startswith(b"RIFF")
+            and signature[8:12] == b"WEBP"
+        )
+    )
+    if not valid_image:
+        raise ValueError("The selected file does not contain a valid image header.")
 
     unique_filename = f"{uuid4().hex}{extension}"
-    file_path = upload_folder / unique_filename
-    file_storage.save(file_path)
-
+    file_storage.save(upload_folder / unique_filename)
     return unique_filename
+
+
+def validate_safe_image_category(form) -> bool:
+    """Avoid collecting photographs of identity cards or wallets."""
+    image = form.image.data
+    if image is not None and image.filename and form.category.data in SENSITIVE_IMAGE_CATEGORIES:
+        form.image.errors.append(
+            "For privacy, do not upload photos of ID documents, student cards or wallets. "
+            "Please submit the report without a photograph."
+        )
+        return False
+    return True
 
 
 def env_flag(name: str, default: bool = False) -> bool:
@@ -453,9 +478,21 @@ def create_app() -> Flask:
     # APPLICATION CONFIGURATION
     # -----------------------------------------------------
 
-    app.config["SECRET_KEY"] = os.environ.get(
-        "SECRET_KEY",
-        "development-key-change-later",
+    # Never use a known secret for sessions/CSRF. For local development,
+    # generate an ephemeral secret when one is not supplied; deployment
+    # must explicitly configure SECRET_KEY via its environment settings.
+    configured_secret = os.environ.get("SECRET_KEY")
+    if configured_secret:
+        app.config["SECRET_KEY"] = configured_secret
+    elif os.environ.get("DATABASE_URL"):
+        raise RuntimeError("Set SECRET_KEY in the deployment environment before starting the application.")
+    else:
+        app.config["SECRET_KEY"] = secrets.token_urlsafe(32)
+
+    app.config["SESSION_COOKIE_HTTPONLY"] = True
+    app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+    app.config["SESSION_COOKIE_SECURE"] = env_flag(
+        "SESSION_COOKIE_SECURE", env_flag("RENDER", False)
     )
 
     # -----------------------------------------------------
@@ -501,14 +538,54 @@ def create_app() -> Flask:
     # IMAGE UPLOAD CONFIGURATION
     # -----------------------------------------------------
 
-    upload_folder = Path(app.static_folder) / "uploads"
-
-    upload_folder.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
-
+    # New uploads live in a private directory, not at /static/uploads/.
+    upload_folder = Path(app.instance_path) / "uploads"
+    upload_folder.mkdir(parents=True, exist_ok=True)
     app.config["UPLOAD_FOLDER"] = str(upload_folder)
+
+    # Move older local test photographs out of the publicly served static
+    # directory. Keep the static/uploads/.gitkeep placeholder intact.
+    legacy_upload_folder = Path(app.static_folder) / "uploads"
+    if legacy_upload_folder.exists():
+        for previous_image in legacy_upload_folder.iterdir():
+            if not previous_image.is_file() or previous_image.suffix.lower() not in IMAGE_EXTENSIONS:
+                continue
+            destination = upload_folder / previous_image.name
+            if destination.exists():
+                previous_image.unlink()
+            else:
+                shutil.move(str(previous_image), str(destination))
+
+    @app.after_request
+    def add_security_headers(response):
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        return response
+
+    @app.get("/item-images/<string:report_type>/<int:item_id>")
+    @login_required
+    def item_image(report_type: str, item_id: int):
+        """Serve item images through authentication and category access rules."""
+        if report_type == "lost":
+            item = db.session.get(LostItem, item_id)
+            poster_id = item.reporter_id if item else None
+        elif report_type == "found":
+            item = db.session.get(FoundItem, item_id)
+            poster_id = item.finder_id if item else None
+        else:
+            abort(404)
+
+        if item is None or not item.image_filename:
+            abort(404)
+        if (
+            item.category in SENSITIVE_IMAGE_CATEGORIES
+            and current_user.role != "ADMIN"
+            and current_user.id != poster_id
+        ):
+            abort(403)
+
+        response = send_from_directory(app.config["UPLOAD_FOLDER"], item.image_filename)
+        response.headers["Cache-Control"] = "private, no-store"
+        return response
 
     # Limit each request to 5 MB.
     app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024
@@ -595,11 +672,12 @@ def create_app() -> Flask:
         form = RegistrationForm()
 
         if form.validate_on_submit():
-            student_number = (
-                form.student_number.data
+            uwc_identifier = (
+                form.uwc_identifier.data
                 .strip()
                 .upper()
             )
+            identifier_type = form.identifier_type.data
 
             first_name = (
                 form.first_name.data
@@ -617,34 +695,25 @@ def create_app() -> Flask:
                 .lower()
             )
 
-            existing_user = db.session.execute(
-                db.select(User).where(
-                    or_(
-                        User.student_number == student_number,
-                        User.email == email,
-                    )
-                )
-            ).scalar_one_or_none()
+            # Email and identifier may belong to *different* existing
+            # accounts. Two separate lookups avoid MultipleResultsFound.
+            email_exists = db.session.execute(
+                db.select(User.id).where(User.email == email)
+            ).scalar_one_or_none() is not None
+            identifier_exists = db.session.execute(
+                db.select(User.id).where(User.uwc_identifier == uwc_identifier)
+            ).scalar_one_or_none() is not None
 
-            if existing_user is not None:
-                if existing_user.email == email:
-                    flash(
-                        "An account already uses this email address.",
-                        "error",
-                    )
-                else:
-                    flash(
-                        "An account already uses this student number.",
-                        "error",
-                    )
-
-                return render_template(
-                    "register.html",
-                    form=form,
-                )
+            if email_exists or identifier_exists:
+                if email_exists:
+                    flash("An account already uses this email address.", "error")
+                if identifier_exists:
+                    flash("An account already uses this UWC identifier.", "error")
+                return render_template("register.html", form=form)
 
             user = User(
-                student_number=student_number,
+                uwc_identifier=uwc_identifier,
+                identifier_type=identifier_type,
                 first_name=first_name,
                 surname=surname,
                 email=email,
@@ -663,7 +732,7 @@ def create_app() -> Flask:
 
                 flash(
                     "The account could not be created because "
-                    "the email or student number already exists.",
+                    "the email or UWC identifier already exists.",
                     "error",
                 )
 
@@ -854,10 +923,17 @@ def create_app() -> Flask:
                 if cleaned_brand:
                     brand = cleaned_brand
 
-            image_filename = save_uploaded_image(
-                form.image.data,
-                Path(app.config["UPLOAD_FOLDER"]),
-            )
+            if not validate_safe_image_category(form):
+                return render_template("report_lost_item.html", form=form)
+
+            try:
+                image_filename = save_uploaded_image(
+                    form.image.data,
+                    Path(app.config["UPLOAD_FOLDER"]),
+                )
+            except ValueError as exc:
+                form.image.errors.append(str(exc))
+                return render_template("report_lost_item.html", form=form)
 
             lost_item = LostItem(
                 reporter_id=current_user.id,
@@ -933,10 +1009,17 @@ def create_app() -> Flask:
                 if cleaned_brand:
                     brand = cleaned_brand
 
-            image_filename = save_uploaded_image(
-                form.image.data,
-                Path(app.config["UPLOAD_FOLDER"]),
-            )
+            if not validate_safe_image_category(form):
+                return render_template("report_found_item.html", form=form)
+
+            try:
+                image_filename = save_uploaded_image(
+                    form.image.data,
+                    Path(app.config["UPLOAD_FOLDER"]),
+                )
+            except ValueError as exc:
+                form.image.errors.append(str(exc))
+                return render_template("report_found_item.html", form=form)
 
 
             found_item = FoundItem(
@@ -1293,7 +1376,8 @@ def create_app() -> Flask:
             db.select(FoundItem)
             .where(
                 FoundItem.status
-                == "REPORTED_FOUND"
+                == "REPORTED_FOUND",
+                FoundItem.finder_id != current_user.id,
             )
             .order_by(
                 FoundItem.created_at.desc()
@@ -1311,8 +1395,16 @@ def create_app() -> Flask:
                     )
                 )
 
-                # Only display reasonably strong matches.
-                if score >= 55:
+                # A date and broad category alone should not be treated
+                # as evidence that two items are alike. Require at least
+                # one identifying attribute or shared descriptive keyword.
+                has_identifying_evidence = any(
+                    reason in {
+                        "Same colour", "Similar colour", "Same brand", "Similar brand"
+                    } or reason.startswith("Shared keywords:")
+                    for reason in reasons
+                )
+                if score >= 55 and has_identifying_evidence:
                     matches.append(
                         {
                             "lost_item": lost_item,

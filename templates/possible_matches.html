@@ -76,7 +76,7 @@
                                 {% endif %}
                             "
                         >
-                            {{ match.score }}% match
+                            Score: {{ match.score }}/100
                         </span>
                     </div>
 
@@ -84,12 +84,9 @@
                         <section class="lost-section">
                             <h3>Lost report</h3>
 
-                            {% if match.lost_item.image_filename %}
+                            {% if match.lost_item.image_filename and match.lost_item.category not in ["IDENTIFICATION", "STUDENT_CARD", "WALLET"] %}
                                 <img
-                                    src="{{ url_for(
-                                        'static',
-                                        filename='uploads/' ~ match.lost_item.image_filename
-                                    ) }}"
+                                    src="{{ url_for('item_image', report_type='lost', item_id=match.lost_item.id) }}"
                                     alt="Lost item: {{ match.lost_item.item_name }}"
                                     class="match-item-image"
                                 >
@@ -153,12 +150,9 @@
                         <section class="found-section">
                             <h3>Found report</h3>
 
-                            {% if match.found_item.image_filename %}
+                            {% if match.found_item.image_filename and match.found_item.category not in ["IDENTIFICATION", "STUDENT_CARD", "WALLET"] %}
                                 <img
-                                    src="{{ url_for(
-                                        'static',
-                                        filename='uploads/' ~ match.found_item.image_filename
-                                    ) }}"
+                                    src="{{ url_for('item_image', report_type='found', item_id=match.found_item.id) }}"
                                     alt="Found item: {{ match.found_item.item_name }}"
                                     class="match-item-image"
                                 >

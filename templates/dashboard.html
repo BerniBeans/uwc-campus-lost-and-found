@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block content %}
-    <h1>Student dashboard</h1>
+    <h1>Dashboard</h1>
 
     <p>
         Welcome,
@@ -62,8 +62,13 @@
 
     <div class="user-details">
         <p>
-            <strong>Student number:</strong>
-            {{ current_user.student_number }}
+            <strong>Account type:</strong>
+            {{ current_user.identifier_type.title() }}
+        </p>
+
+        <p>
+            <strong>UWC identifier:</strong>
+            {{ current_user.uwc_identifier }}
         </p>
 
         <p>

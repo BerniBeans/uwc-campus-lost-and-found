@@ -23,8 +23,8 @@
             </p>
 
             <p>
-                <strong>Student number:</strong>
-                {{ claim.claimant.student_number }}
+                <strong>UWC identifier ({{ claim.claimant.identifier_type.title() }}):</strong>
+                {{ claim.claimant.uwc_identifier }}
             </p>
 
             <p>
@@ -47,10 +47,7 @@
 
             {% if claim.found_item.image_filename %}
                 <img
-                    src="{{ url_for(
-                        'static',
-                        filename='uploads/' ~ claim.found_item.image_filename
-                    ) }}"
+                    src="{{ url_for('item_image', report_type='found', item_id=claim.found_item.id) }}"
                     alt="Found item: {{ claim.found_item.item_name }}"
                     class="review-item-image"
                 >

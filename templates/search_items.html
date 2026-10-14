@@ -186,13 +186,10 @@
                     {% for item in lost_items %}
                         <article class="item-card lost-card">
 
-                            {% if item.image_filename %}
+                            {% if item.image_filename and item.category not in ["IDENTIFICATION", "STUDENT_CARD", "WALLET"] %}
                                 <div class="item-image-container">
                                     <img
-                                        src="{{ url_for(
-                                            'static',
-                                            filename='uploads/' ~ item.image_filename
-                                        ) }}"
+                                        src="{{ url_for('item_image', report_type='lost', item_id=item.id) }}"
                                         alt="Image of {{ item.item_name }}"
                                         class="item-image"
                                     >
@@ -287,13 +284,10 @@
                 <div class="result-grid">
                     {% for item in found_items %}
                         <article class="item-card found-card">
-                            {% if item.image_filename %}
+                            {% if item.image_filename and item.category not in ["IDENTIFICATION", "STUDENT_CARD", "WALLET"] %}
                                 <div class="item-image-container">
                                     <img
-                                        src="{{ url_for(
-                                            'static',
-                                            filename='uploads/' ~ item.image_filename
-                                        ) }}"
+                                        src="{{ url_for('item_image', report_type='found', item_id=item.id) }}"
                                         alt="Image of {{ item.item_name }}"
                                         class="item-image"
                                     >

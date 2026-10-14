@@ -15,11 +15,18 @@ class User(UserMixin, db.Model):
         primary_key=True,
     )
 
-    student_number = db.Column(
+    # An account may belong to a UWC student or a staff member.
+    # The identifier is unique across both account types.
+    uwc_identifier = db.Column(
         db.String(30),
         unique=True,
         nullable=False,
         index=True,
+    )
+
+    identifier_type = db.Column(
+        db.String(20),
+        nullable=False,
     )
 
     first_name = db.Column(
@@ -90,7 +97,7 @@ class User(UserMixin, db.Model):
     def __repr__(self) -> str:
         return (
             f"<User id={self.id} "
-            f"student_number={self.student_number!r}>"
+            f"uwc_identifier={self.uwc_identifier!r}>"
         )
 
 

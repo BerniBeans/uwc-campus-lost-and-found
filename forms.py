@@ -22,15 +22,27 @@ from wtforms.validators import (
 
 
 class RegistrationForm(FlaskForm):
-    student_number = StringField(
-        "Student number",
+    identifier_type = SelectField(
+        "Account type",
+        choices=[
+            ("", "Select an account type"),
+            ("STUDENT", "Student"),
+            ("STAFF", "Staff member"),
+        ],
         validators=[
-            DataRequired(message="Enter your student number."),
+            DataRequired(message="Choose student or staff member."),
+        ],
+    )
+
+    uwc_identifier = StringField(
+        "UWC student or staff number",
+        validators=[
+            DataRequired(message="Enter your UWC identifier."),
             Length(
                 min=3,
                 max=30,
                 message=(
-                    "Student number must contain "
+                    "UWC identifier must contain "
                     "3 to 30 characters."
                 ),
             ),
