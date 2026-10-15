@@ -1,279 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>
-        {% block title %}
-            Campus Lost and Found
-        {% endblock %}
-    </title>
-
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            background:
-                linear-gradient(
-                    rgba(3, 20, 42, 0.72),
-                    rgba(3, 20, 42, 0.82)
-                ),
-                url("{{ url_for('static', filename='images/uwc-mascot.jpg') }}");
-
-            background-attachment: fixed;
-            background-position: center 30%;
-            background-repeat: no-repeat;
-            background-size: cover;
-
-            color: #111827;
-            font-family: Arial, sans-serif;
-            margin: 0;
-            min-height: 100vh;
-        }
-
-        nav {
-            align-items: center;
-            background: rgba(3, 20, 42, 0.96);
-            border-bottom: 4px solid #d4af37;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 18px;
-            padding: 16px 24px;
-        }
-
-        nav a {
-            color: white;
-            font-weight: bold;
-            text-decoration: none;
-        }
-
-        nav a:hover {
-            color: #f4cf58;
-        }
-
-        .nav-form {
-            display: inline;
-            margin: 0;
-        }
-
-        main {
-            background: rgba(255, 255, 255, 0.95);
-            border: 1px solid rgba(212, 175, 55, 0.45);
-            border-radius: 12px;
-            box-shadow: 0 14px 38px rgba(0, 0, 0, 0.35);
-            margin: 40px auto;
-            max-width: 900px;
-            padding: 30px;
-            width: calc(100% - 32px);
-        }
-
-        h1,
-        h2,
-        h3 {
-            color: #111827;
-        }
-
-        a {
-            color: #1d4ed8;
-        }
-
-        .prototype-banner {
-            background: #d4af37;
-            color: #061a33;
-            font-size: 14px;
-            font-weight: bold;
-            padding: 7px 20px;
-            text-align: center;
-        }
-
-        .form-group {
-            margin-bottom: 18px;
-        }
-
-        label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 6px;
-        }
-
-        input:not([type="checkbox"]):not([type="submit"]),
-        select,
-        textarea {
-            border: 1px solid #9ca3af;
-            border-radius: 4px;
-            font: inherit;
-            padding: 10px;
-            width: 100%;
-        }
-
-        input:not([type="checkbox"]):not([type="submit"]):focus,
-        select:focus,
-        textarea:focus {
-            border-color: #2563eb;
-            outline: 2px solid #bfdbfe;
-        }
-
-        input[type="checkbox"] {
-            margin-right: 6px;
-            width: auto;
-        }
-
-        button,
-        input[type="submit"] {
-            background: #061a33;
-            border: 2px solid #061a33;
-            border-radius: 4px;
-            color: white;
-            cursor: pointer;
-            font: inherit;
-            font-weight: bold;
-            padding: 12px 20px;
-        }
-
-        button:hover,
-        input[type="submit"]:hover {
-            background: #d4af37;
-            border-color: #d4af37;
-            color: #061a33;
-        }
-
-        .logout-button {
-            background: transparent;
-            border: none;
-            color: white;
-            cursor: pointer;
-            display: inline;
-            font: inherit;
-            font-weight: bold;
-            margin: 0;
-            padding: 0;
-            width: auto;
-        }
-
-        .logout-button:hover {
-            background: transparent;
-            border: none;
-            color: #f4cf58;
-        }
-
-        .error-text {
-            color: #b91c1c;
-            font-size: 14px;
-            margin-top: 5px;
-        }
-
-        .flash-success {
-            background: #dcfce7;
-            border: 1px solid #16a34a;
-            border-radius: 4px;
-            color: #14532d;
-            margin-bottom: 16px;
-            padding: 12px;
-        }
-
-        .flash-error {
-            background: #fee2e2;
-            border: 1px solid #dc2626;
-            border-radius: 4px;
-            color: #7f1d1d;
-            margin-bottom: 16px;
-            padding: 12px;
-        }
-
-        .flash-warning {
-            background: #fef3c7;
-            border: 1px solid #d97706;
-            border-radius: 4px;
-            color: #78350f;
-            margin-bottom: 16px;
-            padding: 12px;
-        }
-
-        .flash-info {
-            background: #dbeafe;
-            border: 1px solid #2563eb;
-            border-radius: 4px;
-            color: #1e3a8a;
-            margin-bottom: 16px;
-            padding: 12px;
-        }
-
-        @media (max-width: 600px) {
-            nav {
-                gap: 14px;
-                padding: 14px 16px;
-            }
-
-            main {
-                margin: 24px auto;
-                padding: 22px;
-            }
-        }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#100c21">
+  <title>{% block title %}CampusFound | UWC Lost &amp; Found{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/violet-pages.css', v='4') }}">
+  {% block page_styles %}{% endblock %}
 </head>
-
 <body>
-    <nav>
-        <a href="{{ url_for('home') }}">
-            Home
-        </a>
-
+  <div class="lf-page-aura" aria-hidden="true"></div>
+  <nav class="lf-site-nav" aria-label="Main navigation">
+    <div class="lf-nav-inner">
+      <a class="lf-site-brand" href="{{ url_for('home') }}" aria-label="CampusFound home">
+        <span class="lf-site-symbol" aria-hidden="true">
+          <svg viewBox="0 0 32 32" width="25" height="25" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 28S26 19 26 12a10 10 0 0 0-20 0c0 7 10 16 10 16Z"/><circle cx="16" cy="12" r="3.8"/>
+          </svg>
+        </span>
+        <span class="lf-site-wordmark"><strong>campus<span>found.</span></strong><small>UWC LOST &amp; FOUND</small></span>
+      </a>
+      <div class="lf-site-links">
+        <a class="lf-nav-link" href="{{ url_for('home') }}">Home</a>
         {% if current_user.is_authenticated %}
-            <a href="{{ url_for('dashboard') }}">
-                Dashboard
-            </a>
-
-            <form
-                method="POST"
-                action="{{ url_for('logout') }}"
-                class="nav-form"
-            >
-                {{ logout_form.hidden_tag() }}
-
-                <button
-                    type="submit"
-                    class="logout-button"
-                >
-                    Logout
-                </button>
-            </form>
+          <a class="lf-nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
+          <form method="POST" action="{{ url_for('logout') }}" class="nav-form">
+            {{ logout_form.hidden_tag() }}
+            <button type="submit" class="lf-nav-cta lf-logout-button">Log out <span aria-hidden="true">↗</span></button>
+          </form>
         {% else %}
-            <a href="{{ url_for('login') }}">
-                Login
-            </a>
-
-            <a href="{{ url_for('register') }}">
-                Register
-            </a>
+          <a class="lf-nav-link" href="{{ url_for('login') }}">Log in</a>
+          <a class="lf-nav-cta" href="{{ url_for('register') }}">Get started <span aria-hidden="true">↗</span></a>
         {% endif %}
-    </nav>
-
-    <div class="prototype-banner">
-        UWC Campus Lost-and-Found — Software Engineering Student Project
+      </div>
     </div>
-
-    <main>
-        {% with messages = get_flashed_messages(
-            with_categories=true
-        ) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="flash-{{ category }}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-
-        {% block content %}
-        {% endblock %}
-    </main>
+  </nav>
+  <div class="prototype-banner"><span class="lf-banner-spark" aria-hidden="true">✦</span> UWC Campus Lost-and-Found <span aria-hidden="true">·</span> Software Engineering Student Project</div>
+  <main class="lf-main" id="main-content">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="lf-flashes" role="status">
+          {% for category, message in messages %}
+            <div class="flash-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="lf-site-footer"><span>campus<span class="lf-footer-violet">found.</span></span><span>Built to reconnect the UWC community <span aria-hidden="true">✦</span> Student software engineering project</span></footer>
 </body>
 </html>

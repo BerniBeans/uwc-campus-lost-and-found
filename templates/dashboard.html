@@ -1,299 +1,172 @@
 {% extends "base.html" %}
 
-{% block title %}
-    Dashboard | Campus Lost and Found
+{% block title %}Dashboard | Campus Lost and Found{% endblock %}
+
+{% block page_styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css', v='4') }}">
 {% endblock %}
 
 {% block content %}
-    <h1>Dashboard</h1>
+<div class="lf-dashboard">
+    {# Inline SVG symbols avoid an external icon dependency. #}
+    <svg class="lf-icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <symbol id="lf-icon-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></symbol>
+        <symbol id="lf-icon-package" viewBox="0 0 24 24"><path d="m3 7 9-4 9 4v10l-9 4-9-4V7Z"/><path d="m3 7 9 4 9-4M12 11v10M7.5 5l9 4"/></symbol>
+        <symbol id="lf-icon-pin" viewBox="0 0 24 24"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+        <symbol id="lf-icon-spark" viewBox="0 0 24 24"><path d="m12 2 1.9 6.1L20 10l-6.1 1.9L12 18l-1.9-6.1L4 10l6.1-1.9L12 2ZM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8L19 16Z"/></symbol>
+        <symbol id="lf-icon-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></symbol>
+        <symbol id="lf-icon-clipboard" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="17" rx="2"/><rect x="9" y="2" width="6" height="5" rx="1"/><path d="m8 15 2 2 5-5"/></symbol>
+        <symbol id="lf-icon-bell" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4"/></symbol>
+        <symbol id="lf-icon-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></symbol>
+        <symbol id="lf-icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></symbol>
+        <symbol id="lf-icon-check" viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></symbol>
+        <symbol id="lf-icon-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></symbol>
+    </svg>
 
-    <p>
-        Welcome,
-        <strong>
-            {{ current_user.first_name }}
-            {{ current_user.surname }}
-        </strong>.
-    </p>
+    <section class="lf-hero" aria-labelledby="lf-welcome-title">
+        <div class="lf-hero-glow" aria-hidden="true"></div>
+        <div class="lf-hero-copy">
+            <span class="lf-eyebrow"><span class="lf-live-dot" aria-hidden="true"></span> CAMPUS LOST &amp; FOUND <span class="lf-eyebrow-divider">/</span> YOUR WORKSPACE</span>
+            <h1 id="lf-welcome-title">Welcome back, <span>{{ current_user.first_name }}</span><span class="lf-wave" aria-hidden="true"> ✦</span></h1>
+            <p>Lost something? Found something? You're in the right place. Let's get it back where it belongs.</p>
+            <div class="lf-hero-actions">
+                <a class="lf-primary-action" href="{{ url_for('report_lost_item') }}">
+                    Report a lost item
+                    <svg class="lf-icon" aria-hidden="true"><use href="#lf-icon-arrow"/></svg>
+                </a>
+                <a class="lf-secondary-action" href="{{ url_for('search_items') }}">
+                    <svg class="lf-icon" aria-hidden="true"><use href="#lf-icon-search"/></svg>
+                    Search items
+                </a>
+            </div>
+        </div>
+        <div class="lf-hero-art" aria-hidden="true">
+            <div class="lf-orbit lf-orbit-outer"></div>
+            <div class="lf-orbit lf-orbit-inner"></div>
+            <div class="lf-orbit-core"><svg class="lf-icon" aria-hidden="true"><use href="#lf-icon-pin"/></svg></div>
+            <span class="lf-orbit-star lf-star-one">✦</span>
+            <span class="lf-orbit-star lf-star-two">✧</span>
+            <span class="lf-orbit-star lf-star-three">✦</span>
+        </div>
+    </section>
 
     {% if unread_notifications %}
-        <section class="notification-area">
-            <h2>New notifications</h2>
-
+    <section class="lf-section lf-notifications" aria-labelledby="lf-notifications-heading">
+        <div class="lf-section-heading">
+            <div>
+                <span class="lf-overline">LATEST ACTIVITY</span>
+                <h2 id="lf-notifications-heading">New notifications</h2>
+            </div>
+            <span class="lf-count-pill">{{ unread_notifications | length }} unread</span>
+        </div>
+        <div class="lf-notification-list">
             {% for notification in unread_notifications %}
-                <article
-                    class="notification-card notification-{{ notification.category }}"
-                >
-                    <div class="notification-content">
+                <article class="lf-notification lf-notification-{{ notification.category }}">
+                    <span class="lf-notification-symbol" aria-hidden="true"><svg class="lf-icon"><use href="#lf-icon-bell"/></svg></span>
+                    <div class="lf-notification-copy">
                         <h3>{{ notification.title }}</h3>
                         <p>{{ notification.message }}</p>
-
-                        <small>
-                            {{
-                                notification.created_at.strftime(
-                                    "%d %B %Y at %H:%M"
-                                )
-                            }}
-                        </small>
+                        <time>{{ notification.created_at.strftime("%d %B %Y at %H:%M") }}</time>
                     </div>
-
-                    <form
-                        method="POST"
-                        action="{{
-                            url_for(
-                                'mark_notification_read',
-                                notification_id=notification.id
-                            )
-                        }}"
-                        class="notification-form"
-                    >
+                    <form method="POST" action="{{ url_for('mark_notification_read', notification_id=notification.id) }}" class="lf-notification-form">
                         {{ notification_read_form.hidden_tag() }}
-
-                        <button
-                            type="submit"
-                            class="notification-button"
-                        >
-                            Mark as read
-                        </button>
+                        <button class="lf-notice-button" type="submit"><svg class="lf-icon" aria-hidden="true"><use href="#lf-icon-check"/></svg> Mark as read</button>
                     </form>
                 </article>
             {% endfor %}
-        </section>
+        </div>
+    </section>
     {% endif %}
 
-    <div class="user-details">
-        <p>
-            <strong>Account type:</strong>
-            {{ current_user.identifier_type.title() }}
-        </p>
+    <section class="lf-section" aria-labelledby="lf-quick-heading">
+        <div class="lf-section-heading">
+            <div>
+                <span class="lf-overline">EXPLORE THE PLATFORM</span>
+                <h2 id="lf-quick-heading">What would you like to do?</h2>
+            </div>
+            <span class="lf-section-note">Quick access to every tool</span>
+        </div>
 
-        <p>
-            <strong>UWC identifier:</strong>
-            {{ current_user.uwc_identifier }}
-        </p>
-
-        <p>
-            <strong>Email:</strong>
-            {{ current_user.email }}
-        </p>
-
-        <p>
-            <strong>Account role:</strong>
-            {{ current_user.role.title() }}
-        </p>
-    </div>
-
-    <hr>
-
-    <h2>Lost-and-found services</h2>
-
-    <div class="service-links">
-        <a
-            href="{{ url_for('report_lost_item') }}"
-            class="service-card active-service"
-        >
-            <h3>Report a lost item</h3>
-
-            <p>
-                Submit information about an item that you lost
-                on campus.
-            </p>
-        </a>
-
-        <a
-            href="{{ url_for('report_found_item') }}"
-            class="service-card active-service"
-        >
-            <h3>Report a found item</h3>
-
-            <p>
-                Record an item that you found on campus and
-                indicate where it is being stored.
-            </p>
-        </a>
-
-        <a
-            href="{{ url_for('search_items') }}"
-            class="service-card active-service"
-        >
-            <h3>Search reported items</h3>
-
-            <p>
-                Search lost and found reports by category,
-                colour, date, keyword or location.
-            </p>
-        </a>
-
-        <a
-            href="{{ url_for('possible_matches') }}"
-            class="service-card active-service"
-        >
-            <h3>View possible matches</h3>
-
-            <p>
-                View found items that may match one of your
-                lost-item reports.
-            </p>
-        </a>
-
-        <a
-            href="{{ url_for('submit_claim') }}"
-            class="service-card active-service"
-        >
-            <h3>Submit an ownership claim</h3>
-
-            <p>
-                Provide private identifying information to claim
-                a reported found item.
-            </p>
-        </a>
-
-        {% if current_user.role == "ADMIN" %}
-            <a
-                href="{{ url_for('admin_claims') }}"
-                class="service-card admin-service"
-            >
-                <h3>Review ownership claims</h3>
-
-                <p>
-                    Review pending claims and approve or reject
-                    ownership requests.
-                </p>
+        <div class="lf-actions-grid">
+            <a href="{{ url_for('report_lost_item') }}" class="lf-action-card">
+                <span class="lf-action-icon lf-action-violet"><svg class="lf-icon" aria-hidden="true"><use href="#lf-icon-search"/></svg></span>
+                <span class="lf-action-copy"><strong>Report a lost item</strong><span>Tell the campus community what you're looking for.</span></span>
+                <svg class="lf-icon lf-card-arrow" aria-hidden="true"><use href="#lf-icon-arrow"/></svg>
             </a>
-        {% endif %}
-    </div>
+            <a href="{{ url_for('report_found_item') }}" class="lf-action-card">
+                <span class="lf-action-icon lf-action-indigo"><svg class="lf-icon" aria-hidden="true"><use href="#lf-icon-package"/></svg></span>
+                <span class="lf-action-copy"><strong>Report a found item</strong><span>Help an item make its way back to its owner.</span></span>
+                <svg class="lf-icon lf-card-arrow" aria-hidden="true"><use href="#lf-icon-arrow"/></svg>
+            </a>
+            <a href="{{ url_for('search_items') }}" class="lf-action-card">
+                <span class="lf-action-icon lf-action-cyan"><svg class="lf-icon" aria-hidden="true"><use href="#lf-icon-search"/></svg></span>
+                <span class="lf-action-copy"><strong>Search reported items</strong><span>Browse the latest lost and found listings.</span></span>
+                <svg class="lf-icon lf-card-arrow" aria-hidden="true"><use href="#lf-icon-arrow"/></svg>
+            </a>
+            <a href="{{ url_for('possible_matches') }}" class="lf-action-card">
+                <span class="lf-action-icon lf-action-pink"><svg class="lf-icon" aria-hidden="true"><use href="#lf-icon-spark"/></svg></span>
+                <span class="lf-action-copy"><strong>Possible matches</strong><span>Explore found items that may match your reports.</span></span>
+                <svg class="lf-icon lf-card-arrow" aria-hidden="true"><use href="#lf-icon-arrow"/></svg>
+            </a>
+            <a href="{{ url_for('submit_claim') }}" class="lf-action-card">
+                <span class="lf-action-icon lf-action-amber"><svg class="lf-icon" aria-hidden="true"><use href="#lf-icon-shield"/></svg></span>
+                <span class="lf-action-copy"><strong>Submit an ownership claim</strong><span>Provide identifying details to request an item.</span></span>
+                <svg class="lf-icon lf-card-arrow" aria-hidden="true"><use href="#lf-icon-arrow"/></svg>
+            </a>
+            {% if current_user.role == "ADMIN" %}
+            <a href="{{ url_for('admin_claims') }}" class="lf-action-card lf-action-admin">
+                <span class="lf-action-icon lf-action-green"><svg class="lf-icon" aria-hidden="true"><use href="#lf-icon-clipboard"/></svg></span>
+                <span class="lf-action-copy"><strong>Review ownership claims <span class="lf-role-tag">ADMIN</span></strong><span>Review and decide on pending ownership requests.</span></span>
+                <svg class="lf-icon lf-card-arrow" aria-hidden="true"><use href="#lf-icon-arrow"/></svg>
+            </a>
+            {% endif %}
+        </div>
+    </section>
 
-    <style>
-        .notification-area {
-            margin: 22px 0;
-        }
+    <section class="lf-section" aria-labelledby="lf-activity-heading">
+        <div class="lf-section-heading">
+            <div>
+                <span class="lf-overline">AT A GLANCE</span>
+                <h2 id="lf-activity-heading">Your activity</h2>
+            </div>
+            <span class="lf-section-note">Your account · Live data</span>
+        </div>
+        <div class="lf-stats-grid">
+            <div class="lf-stat-card">
+                <div class="lf-stat-top"><span class="lf-stat-label">Lost reports</span><span class="lf-stat-icon"><svg class="lf-icon" aria-hidden="true"><use href="#lf-icon-search"/></svg></span></div>
+                <span class="lf-stat-value">{{ current_user.lost_items | length }}</span>
+                <span class="lf-stat-caption">Reported by you</span>
+            </div>
+            <div class="lf-stat-card">
+                <div class="lf-stat-top"><span class="lf-stat-label">Found reports</span><span class="lf-stat-icon"><svg class="lf-icon" aria-hidden="true"><use href="#lf-icon-package"/></svg></span></div>
+                <span class="lf-stat-value">{{ current_user.found_items | length }}</span>
+                <span class="lf-stat-caption">Reported by you</span>
+            </div>
+            <div class="lf-stat-card">
+                <div class="lf-stat-top"><span class="lf-stat-label">Your claims</span><span class="lf-stat-icon"><svg class="lf-icon" aria-hidden="true"><use href="#lf-icon-shield"/></svg></span></div>
+                <span class="lf-stat-value">{{ current_user.ownership_claims | length }}</span>
+                <span class="lf-stat-caption">Ownership claims submitted</span>
+            </div>
+            <div class="lf-stat-card lf-stat-accent">
+                <div class="lf-stat-top"><span class="lf-stat-label">Unread updates</span><span class="lf-stat-icon"><svg class="lf-icon" aria-hidden="true"><use href="#lf-icon-bell"/></svg></span></div>
+                <span class="lf-stat-value">{{ unread_notifications | length }}</span>
+                <span class="lf-stat-caption">Notifications awaiting you</span>
+            </div>
+        </div>
+    </section>
 
-        .notification-area h2 {
-            margin-bottom: 12px;
-        }
 
-        .notification-card {
-            align-items: flex-start;
-            background: #eff6ff;
-            border: 1px solid #93c5fd;
-            border-left: 5px solid #2563eb;
-            border-radius: 8px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 16px;
-            justify-content: space-between;
-            margin-bottom: 12px;
-            padding: 16px;
-        }
-
-        .notification-success {
-            background: #f0fdf4;
-            border-color: #86efac;
-            border-left-color: #16a34a;
-        }
-
-        .notification-error {
-            background: #fef2f2;
-            border-color: #fecaca;
-            border-left-color: #dc2626;
-        }
-
-        .notification-content {
-            flex: 1 1 420px;
-        }
-
-        .notification-content h3 {
-            margin: 0 0 8px;
-        }
-
-        .notification-content p {
-            margin: 0 0 8px;
-        }
-
-        .notification-content small {
-            color: #4b5563;
-        }
-
-        .notification-form {
-            margin: 0;
-        }
-
-        .notification-button {
-            padding: 9px 13px;
-        }
-
-        .user-details {
-            background: #f9fafb;
-            border-left: 4px solid #061a33;
-            margin: 20px 0;
-            padding: 10px 16px;
-        }
-
-        .user-details p {
-            margin: 10px 0;
-        }
-
-        .service-links {
-            display: grid;
-            gap: 16px;
-            grid-template-columns:
-                repeat(auto-fit, minmax(240px, 1fr));
-            margin-top: 20px;
-        }
-
-        .service-card {
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            display: block;
-            min-height: 150px;
-            padding: 18px;
-            transition:
-                background-color 0.2s ease,
-                border-color 0.2s ease,
-                transform 0.2s ease;
-        }
-
-        .service-card h3 {
-            margin-top: 0;
-        }
-
-        .service-card p {
-            line-height: 1.4;
-        }
-
-        .active-service {
-            background: #eff6ff;
-            border-color: #2563eb;
-            color: #111827;
-            text-decoration: none;
-        }
-
-        .active-service:hover {
-            background: #dbeafe;
-            border-color: #1d4ed8;
-            transform: translateY(-2px);
-        }
-
-        .admin-service {
-            background: #fef3c7;
-            border: 2px solid #d4af37;
-            color: #111827;
-            text-decoration: none;
-        }
-
-        .admin-service:hover {
-            background: #fde68a;
-            border-color: #b8860b;
-            transform: translateY(-2px);
-        }
-
-        @media (max-width: 600px) {
-            .service-links {
-                grid-template-columns: 1fr;
-            }
-
-            .service-card {
-                min-height: auto;
-            }
-        }
-    </style>
+    <section class="lf-profile-section" aria-labelledby="lf-profile-heading">
+        <div class="lf-profile-id">
+            <span class="lf-profile-avatar" aria-hidden="true">{{ current_user.first_name[:1] | upper }}{{ current_user.surname[:1] | upper }}</span>
+            <div><span class="lf-overline">SIGNED-IN ACCOUNT</span><h2 id="lf-profile-heading">{{ current_user.first_name }} {{ current_user.surname }}</h2><span class="lf-profile-email">{{ current_user.email }}</span></div>
+        </div>
+        <div class="lf-profile-meta">
+            <span class="lf-meta-chip"><svg class="lf-icon" aria-hidden="true"><use href="#lf-icon-user"/></svg>{{ current_user.identifier_type | title }}</span>
+            <span class="lf-meta-chip">ID: {{ current_user.uwc_identifier }}</span>
+            <span class="lf-meta-chip {% if current_user.role == 'ADMIN' %}lf-meta-admin{% endif %}"><svg class="lf-icon" aria-hidden="true"><use href="#lf-icon-shield"/></svg>{{ current_user.role | title }}</span>
+        </div>
+    </section>
+    <p class="lf-footer">CAMPUS LOST &amp; FOUND <span aria-hidden="true">✦</span> Helping lost things find their way home</p>
+</div>
 {% endblock %}

@@ -1,92 +1,74 @@
 {% extends "base.html" %}
 
-{% block title %}
-    Register | Campus Lost and Found
-{% endblock %}
+{% block title %}Create account | CampusFound{% endblock %}
 
 {% block content %}
-    <h1>Create an account</h1>
-
-    <form method="POST">
+<div class="lf-auth lf-auth-register">
+  <aside class="lf-auth-showcase" aria-label="About registering">
+    <div class="lf-auth-showcase-content">
+      <span class="lf-auth-eyebrow"><span class="lf-pulse" aria-hidden="true"></span> YOUR COMMUNITY STARTS HERE</span>
+      <h1>Be part of<br>the <em>find.</em></h1>
+      <p>Join your campus lost-and-found community. Whether you're a student or staff member, there's a place for you here.</p>
+      <div class="lf-register-benefits" aria-label="What you can do with an account">
+        <div class="lf-register-benefit"><span class="lf-benefit-icon" aria-hidden="true">↗</span><span><strong>Report with ease</strong><small>Share lost and found items.</small></span></div>
+        <div class="lf-register-benefit"><span class="lf-benefit-icon" aria-hidden="true">⌕</span><span><strong>Explore possible matches</strong><small>Find reports that look familiar.</small></span></div>
+        <div class="lf-register-benefit"><span class="lf-benefit-icon" aria-hidden="true">✓</span><span><strong>Submit a claim</strong><small>Request a review of ownership.</small></span></div>
+      </div>
+      <div class="lf-auth-orb" aria-hidden="true"></div>
+    </div>
+  </aside>
+  <section class="lf-auth-panel" aria-labelledby="lf-register-heading">
+    <div class="lf-auth-panel-inner lf-register-inner">
+      <span class="lf-auth-overline">LET'S GET STARTED <span aria-hidden="true">/</span> CREATE ACCOUNT</span>
+      <h2 id="lf-register-heading">Create your <span>account.</span></h2>
+      <p class="lf-auth-intro">Just a few details and you're on your way.</p>
+      <form class="lf-auth-form" method="POST">
         {{ form.hidden_tag() }}
-
-        <div class="form-group">
-            {{ form.identifier_type.label }}
-            {{ form.identifier_type() }}
-
-            {% for error in form.identifier_type.errors %}
-                <div class="error-text">
-                    {{ error }}
-                </div>
-            {% endfor %}
+        <div class="lf-field">
+          {{ form.identifier_type.label }}
+          {{ form.identifier_type(class="lf-control", autocomplete="off") }}
+          {% for error in form.identifier_type.errors %}<p class="lf-field-error">{{ error }}</p>{% endfor %}
         </div>
-
-        <div class="form-group">
-            {{ form.uwc_identifier.label }}
-            {{ form.uwc_identifier() }}
-
-            {% for error in form.uwc_identifier.errors %}
-                <div class="error-text">
-                    {{ error }}
-                </div>
-            {% endfor %}
+        <div class="lf-field">
+          {{ form.uwc_identifier.label }}
+          {{ form.uwc_identifier(class="lf-control", placeholder="Enter your student or staff number", autocomplete="off") }}
+          {% for error in form.uwc_identifier.errors %}<p class="lf-field-error">{{ error }}</p>{% endfor %}
         </div>
-
-        <div class="form-group">
+        <div class="lf-form-row">
+          <div class="lf-field">
             {{ form.first_name.label }}
-            {{ form.first_name() }}
-
-            {% for error in form.first_name.errors %}
-                <div class="error-text">
-                    {{ error }}
-                </div>
-            {% endfor %}
-        </div>
-
-        <div class="form-group">
+            {{ form.first_name(class="lf-control", placeholder="First name", autocomplete="given-name") }}
+            {% for error in form.first_name.errors %}<p class="lf-field-error">{{ error }}</p>{% endfor %}
+          </div>
+          <div class="lf-field">
             {{ form.surname.label }}
-            {{ form.surname() }}
-
-            {% for error in form.surname.errors %}
-                <div class="error-text">
-                    {{ error }}
-                </div>
-            {% endfor %}
+            {{ form.surname(class="lf-control", placeholder="Surname", autocomplete="family-name") }}
+            {% for error in form.surname.errors %}<p class="lf-field-error">{{ error }}</p>{% endfor %}
+          </div>
         </div>
-
-        <div class="form-group">
-            {{ form.email.label }}
-            {{ form.email() }}
-
-            {% for error in form.email.errors %}
-                <div class="error-text">
-                    {{ error }}
-                </div>
-            {% endfor %}
+        <div class="lf-field">
+          {{ form.email.label }}
+          {{ form.email(class="lf-control", placeholder="you@example.com", autocomplete="email") }}
+          {% for error in form.email.errors %}<p class="lf-field-error">{{ error }}</p>{% endfor %}
         </div>
-
-        <div class="form-group">
+        <div class="lf-form-row">
+          <div class="lf-field">
             {{ form.password.label }}
-            {{ form.password() }}
-
-            {% for error in form.password.errors %}
-                <div class="error-text">
-                    {{ error }}
-                </div>
-            {% endfor %}
-        </div>
-
-        <div class="form-group">
+            {{ form.password(class="lf-control", placeholder="At least 8 characters", autocomplete="new-password") }}
+            {% for error in form.password.errors %}<p class="lf-field-error">{{ error }}</p>{% endfor %}
+          </div>
+          <div class="lf-field">
             {{ form.confirm_password.label }}
-            {{ form.confirm_password() }}
-
-            {% for error in form.confirm_password.errors %}
-                <div class="error-text">
-                    {{ error }}
-                </div>
-            {% endfor %}
+            {{ form.confirm_password(class="lf-control", placeholder="Confirm password", autocomplete="new-password") }}
+            {% for error in form.confirm_password.errors %}<p class="lf-field-error">{{ error }}</p>{% endfor %}
+          </div>
         </div>
-
-        {{ form.submit() }}
-    </form>
+        <p class="lf-password-hint">Use a password of at least 8 characters.</p>
+        {{ form.submit(class="lf-form-submit") }}
+      </form>
+      <p class="lf-auth-switch">Already have an account? <a href="{{ url_for('login') }}">Log in <span aria-hidden="true">→</span></a></p>
+      <div class="lf-auth-bottom-note">Student project demo · CampusFound is not an official UWC identity verification service.</div>
+    </div>
+  </section>
+</div>
 {% endblock %}

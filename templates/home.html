@@ -1,20 +1,56 @@
 {% extends "base.html" %}
 
-{% block title %}
-    Home | Campus Lost and Found
-{% endblock %}
+{% block title %}CampusFound | UWC Lost &amp; Found{% endblock %}
 
 {% block content %}
-    <h1>Campus Lost-and-Found System</h1>
+<div class="lf-landing">
+  <section class="lf-home-hero" aria-labelledby="lf-home-title">
+    <div class="lf-home-copy">
+      <div class="lf-kicker"><span class="lf-pulse" aria-hidden="true"></span> MADE FOR THE UWC COMMUNITY</div>
+      <h1 id="lf-home-title">Lost it on campus?<br><span>Let's find it.</span></h1>
+      <p class="lf-lede">Your campus lost-and-found, reimagined. Report what you've lost, share what you've found, and help belongings make their way home.</p>
+      <div class="lf-home-actions">
+        {% if current_user.is_authenticated %}
+          <a class="lf-btn lf-btn-primary" href="{{ url_for('dashboard') }}">Open your dashboard <span aria-hidden="true">↗</span></a>
+          <a class="lf-btn lf-btn-glass" href="{{ url_for('search_items') }}">Browse items <span aria-hidden="true">→</span></a>
+        {% else %}
+          <a class="lf-btn lf-btn-primary" href="{{ url_for('register') }}">Get started for free <span aria-hidden="true">↗</span></a>
+          <a class="lf-btn lf-btn-glass" href="{{ url_for('login') }}">I have an account <span aria-hidden="true">→</span></a>
+        {% endif %}
+      </div>
+      <div class="lf-home-footnote"><span class="lf-tick" aria-hidden="true">✓</span> For UWC students &amp; staff <span class="lf-foot-sep">·</span> A student software engineering project</div>
+    </div>
 
-    <p>
-        Report lost items, report found items and submit
-        ownership claims.
-    </p>
+    <div class="lf-mascot-scene" aria-label="UWC Caracals mascot welcoming the campus community">
+      <div class="lf-mascot-frame">
+        <img class="lf-mascot-photo" src="{{ url_for('static', filename='images/uwc-mascot.jpg') }}" alt="UWC Caracals mascot on the university sports field" loading="eager">
+        <div class="lf-mascot-photo-shade" aria-hidden="true"></div>
+        <div class="lf-mascot-label"><span class="lf-pulse" aria-hidden="true"></span> MEET YOUR CAMPUS SIDEKICK</div>
+        <div class="lf-mascot-caption"><span>FOUND YOUR COMMUNITY.</span><strong>Now let's find your stuff.</strong></div>
+      </div>
+      <div class="lf-mascot-float lf-mascot-lost"><span class="lf-float-icon">⌕</span><span><strong>Report lost</strong><small>Make it easier to find.</small></span></div>
+      <div class="lf-mascot-float lf-mascot-found"><span class="lf-float-icon">✦</span><span><strong>Report found</strong><small>Help someone get it back.</small></span></div>
+      <span class="lf-mascot-star" aria-hidden="true">✧</span>
+    </div>
+  </section>
 
-    <p>
-        <a href="{{ url_for('register') }}">
-            Create an account
-        </a>
-    </p>
+  <section class="lf-home-process" aria-labelledby="lf-steps-title">
+    <div class="lf-section-topline">SIMPLE BY DESIGN <span aria-hidden="true">/</span> HOW IT WORKS</div>
+    <div class="lf-process-heading"><h2 id="lf-steps-title">From lost to <span>found.</span></h2><p>Three straightforward steps to make campus recovery easier.</p></div>
+    <div class="lf-process-cards">
+      <article class="lf-process-card"><div class="lf-step-number">01 <span aria-hidden="true">↗</span></div><div class="lf-process-icon">◎</div><h3>Report it</h3><p>Tell us what you lost or found, along with useful identifying details.</p></article>
+      <article class="lf-process-card"><div class="lf-step-number">02 <span aria-hidden="true">↗</span></div><div class="lf-process-icon">⌕</div><h3>Explore matches</h3><p>Search reports and review possible matches to your lost belongings.</p></article>
+      <article class="lf-process-card"><div class="lf-step-number">03 <span aria-hidden="true">↗</span></div><div class="lf-process-icon">✓</div><h3>Claim securely</h3><p>Submit an ownership claim for review before an item is released.</p></article>
+    </div>
+  </section>
+
+  <section class="lf-home-bottom" aria-label="Get started">
+    <div><span class="lf-section-topline">GOOD THINGS COME BACK</span><h2>Let's get you <em>reconnected.</em></h2></div>
+    {% if current_user.is_authenticated %}
+    <a class="lf-btn lf-btn-primary" href="{{ url_for('dashboard') }}">Go to dashboard <span aria-hidden="true">→</span></a>
+    {% else %}
+    <a class="lf-btn lf-btn-primary" href="{{ url_for('register') }}">Create your account <span aria-hidden="true">→</span></a>
+    {% endif %}
+  </section>
+</div>
 {% endblock %}

@@ -1,63 +1,45 @@
 {% extends "base.html" %}
 
-{% block title %}
-    Login | Campus Lost and Found
-{% endblock %}
+{% block title %}Log in | CampusFound{% endblock %}
 
 {% block content %}
-    <h1>Log in</h1>
-
-    <p>
-        Enter the email address and password you used when
-        creating your account.
-    </p>
-
-    <form method="POST">
+<div class="lf-auth lf-auth-login">
+  <aside class="lf-auth-showcase" aria-label="About CampusFound">
+    <div class="lf-auth-showcase-content">
+      <span class="lf-auth-eyebrow"><span class="lf-pulse" aria-hidden="true"></span> YOUR CAMPUS CONNECTION</span>
+      <h1>Good to have<br>you <em>back.</em></h1>
+      <p>One campus. A connected community. Your lost-and-found workspace is right where you left it.</p>
+      <div class="lf-auth-emblem" aria-hidden="true">
+        <span class="lf-auth-emblem-ring ring-outer"></span><span class="lf-auth-emblem-ring ring-inner"></span>
+        <span class="lf-auth-emblem-centre"><svg viewBox="0 0 24 24" width="52" height="52" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.7"/></svg></span>
+        <span class="lf-auth-star star-one">✧</span><span class="lf-auth-star star-two">✦</span>
+      </div>
+      <span class="lf-auth-quote">“A little help finding what matters.”</span>
+    </div>
+  </aside>
+  <section class="lf-auth-panel" aria-labelledby="lf-login-heading">
+    <div class="lf-auth-panel-inner">
+      <span class="lf-auth-overline">WELCOME BACK <span aria-hidden="true">/</span> 01</span>
+      <h2 id="lf-login-heading">Log in to <span>CampusFound</span></h2>
+      <p class="lf-auth-intro">Enter your account details to continue to your dashboard.</p>
+      <form class="lf-auth-form" method="POST">
         {{ form.hidden_tag() }}
-
-        <div class="form-group">
-            {{ form.email.label }}
-
-            {{ form.email(
-                placeholder="Enter your email address",
-                autocomplete="email"
-            ) }}
-
-            {% for error in form.email.errors %}
-                <div class="error-text">
-                    {{ error }}
-                </div>
-            {% endfor %}
+        <div class="lf-field">
+          {{ form.email.label }}
+          {{ form.email(placeholder="you@example.com", autocomplete="email", class="lf-control") }}
+          {% for error in form.email.errors %}<p class="lf-field-error">{{ error }}</p>{% endfor %}
         </div>
-
-        <div class="form-group">
-            {{ form.password.label }}
-
-            {{ form.password(
-                placeholder="Enter your password",
-                autocomplete="current-password"
-            ) }}
-
-            {% for error in form.password.errors %}
-                <div class="error-text">
-                    {{ error }}
-                </div>
-            {% endfor %}
+        <div class="lf-field">
+          {{ form.password.label }}
+          {{ form.password(placeholder="Enter your password", autocomplete="current-password", class="lf-control") }}
+          {% for error in form.password.errors %}<p class="lf-field-error">{{ error }}</p>{% endfor %}
         </div>
-
-        <div class="form-group">
-            {{ form.remember() }}
-            {{ form.remember.label }}
-        </div>
-
-        {{ form.submit() }}
-    </form>
-
-    <p>
-        Do not have an account?
-
-        <a href="{{ url_for('register') }}">
-            Register here
-        </a>
-    </p>
+        <div class="lf-check-row"><label class="lf-check-label">{{ form.remember() }} <span>Remember me</span></label><span class="lf-security-message">Secure sign-in <span aria-hidden="true">✧</span></span></div>
+        {{ form.submit(class="lf-form-submit") }}
+      </form>
+      <p class="lf-auth-switch">New to CampusFound? <a href="{{ url_for('register') }}">Create an account <span aria-hidden="true">→</span></a></p>
+      <div class="lf-auth-bottom-note">Built for students and staff at UWC <span aria-hidden="true">✦</span> Student software engineering project</div>
+    </div>
+  </section>
+</div>
 {% endblock %}

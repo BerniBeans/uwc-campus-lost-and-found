@@ -1,0 +1,179 @@
+/* Campus Lost & Found — Violet Tech Dashboard
+   Isolated to the dashboard; other pages keep their original styling. */
+body:has(.lf-dashboard) {
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+}
+body:has(.lf-dashboard) nav {
+    border-bottom-color: #8557ed;
+}
+body:has(.lf-dashboard) .prototype-banner {
+    background: linear-gradient(90deg, #5b21b6, #7c3aed, #a855f7);
+    color: #fff;
+}
+body:has(.lf-dashboard) main {
+    max-width: 1170px;
+    padding: 0;
+    background: #0e0b1b;
+    border-color: rgba(155, 115, 245, .35);
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 26px 75px rgba(0, 0, 0, .5);
+}
+/* Preserve the base template's flash messages on the dashboard. */
+body:has(.lf-dashboard) main > [class^="flash-"] {
+    margin: 20px 28px 0;
+}
+.lf-dashboard {
+    --lf-surface: #151025;
+    --lf-text: #f4f0ff;
+    --lf-muted: #b1a9c6;
+    --lf-border: rgba(187, 164, 245, .16);
+    color: var(--lf-text);
+    background:
+        radial-gradient(ellipse 70% 35% at 91% 0%, rgba(106, 38, 205, .18), transparent 75%),
+        linear-gradient(180deg, #110e22 0%, #0b0a16 100%);
+    padding: clamp(16px, 3.3vw, 38px);
+}
+.lf-dashboard *, .lf-dashboard *::before, .lf-dashboard *::after { box-sizing: border-box; }
+.lf-dashboard h1, .lf-dashboard h2, .lf-dashboard h3, .lf-dashboard p { color: inherit; margin-top: 0; }
+.lf-dashboard a { color: inherit; text-decoration: none; }
+.lf-dashboard a:focus-visible, .lf-dashboard button:focus-visible { outline: 3px solid #d8b4fe; outline-offset: 4px; }
+.lf-icon-library { position: absolute; width: 0; height: 0; overflow: hidden; pointer-events: none; }
+.lf-icon { width: 21px; height: 21px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.lf-hero {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    isolation: isolate;
+    min-height: 290px;
+    overflow: hidden;
+    padding: clamp(26px, 4.5vw, 48px);
+    border: 1px solid rgba(200, 168, 255, .27);
+    border-radius: 23px;
+    background: linear-gradient(110deg, #281353 0%, #3e1d79 58%, #6b2cca 100%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.15), 0 16px 34px rgba(32, 15, 65, .27);
+}
+.lf-hero::after {
+    content: "";
+    position: absolute; inset: 0;
+    background-image: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+    background-size: 35px 35px;
+    -webkit-mask-image: linear-gradient(90deg, transparent 25%, #000 100%);
+    mask-image: linear-gradient(90deg, transparent 25%, #000 100%);
+    pointer-events: none;
+    z-index: -1;
+}
+.lf-hero-glow { position: absolute; right: -130px; top: -160px; width: 450px; height: 450px; background: radial-gradient(circle, rgba(202,162,255,.32), transparent 70%); filter: blur(3px); pointer-events: none; z-index: -1; }
+.lf-hero-copy { position: relative; z-index: 1; max-width: 620px; }
+.lf-eyebrow, .lf-overline { display: inline-flex; align-items: center; gap: 8px; letter-spacing: .15em; font-size: 10px; font-weight: 800; }
+.lf-eyebrow { color: #efe3ff; }
+.lf-eyebrow-divider { opacity: .5; padding: 0 5px; }
+.lf-live-dot { width: 7px; height: 7px; border-radius: 50%; background: #b9ffdf; box-shadow: 0 0 0 4px rgba(185,255,223,.14); }
+.lf-hero h1 { margin: 19px 0 12px; line-height: 1.14; font-size: clamp(27px, 3.8vw, 42px); font-weight: 800; letter-spacing: -.045em; }
+.lf-hero h1 span:first-of-type { color: #efddff; }
+.lf-wave { font-size: .78em; color: #e5bbff; }
+.lf-hero p { max-width: 540px; color: #e5d5fd; line-height: 1.7; font-size: 14px; }
+.lf-hero-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 25px; }
+.lf-dashboard .lf-primary-action, .lf-dashboard .lf-secondary-action { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 45px; padding: 11px 17px; border-radius: 10px; font-size: 13px; font-weight: 800; transition: transform .22s ease, box-shadow .22s ease, background .22s ease; }
+.lf-dashboard .lf-primary-action { background: #fff; color: #3b176f; box-shadow: 0 7px 24px rgba(14,8,32,.22); }
+.lf-dashboard .lf-secondary-action { border: 1px solid rgba(255,255,255,.32); background: rgba(255,255,255,.11); color: #fff; backdrop-filter: blur(8px); }
+.lf-dashboard .lf-primary-action:hover, .lf-dashboard .lf-secondary-action:hover { transform: translateY(-3px); box-shadow: 0 12px 24px rgba(10,5,30,.25); }
+.lf-hero-art { position: relative; flex: 0 0 230px; width: 230px; height: 230px; }
+.lf-orbit { position: absolute; border: 1px solid rgba(233,206,255,.34); border-radius: 50%; transform: rotate(-17deg); }
+.lf-orbit-outer { inset: 5px; box-shadow: inset 0 0 50px rgba(204,157,255,.06), 0 0 55px rgba(226,193,255,.07); }
+.lf-orbit-inner { inset: 43px; border-style: dashed; border-color: rgba(255,255,255,.48); }
+.lf-orbit-core { position: absolute; inset: 78px; display: grid; place-items: center; background: linear-gradient(135deg,#f5dbff,#a883ff); color: #43227f; border-radius: 22px; transform: rotate(-9deg); box-shadow: 0 10px 45px rgba(235,193,255,.38); }
+.lf-orbit-core .lf-icon { width: 35px; height: 35px; transform: rotate(9deg); stroke-width: 1.6; }
+.lf-orbit-star { position: absolute; color: #eaccff; text-shadow: 0 0 22px rgba(255,255,255,.6); }
+.lf-star-one { left: 0; top: 45px; font-size: 33px; }
+.lf-star-two { right: 10px; bottom: 17px; font-size: 25px; }
+.lf-star-three { right: 24px; top: 15px; font-size: 16px; }
+.lf-section { margin-top: 36px; }
+.lf-section-heading { display: flex; justify-content: space-between; align-items: end; flex-wrap: wrap; gap: 12px; margin-bottom: 17px; }
+.lf-overline { color: #b99bf6; }
+.lf-section-heading h2 { font-size: clamp(20px,2.3vw,25px); font-weight: 800; letter-spacing: -.035em; margin: 5px 0 0; }
+.lf-section-note { color: var(--lf-muted); font-size: 12px; }
+.lf-stats-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 13px; }
+.lf-stat-card { min-width: 0; padding: 19px 18px; background: linear-gradient(145deg, #1c1730, #151123); border: 1px solid var(--lf-border); border-radius: 16px; box-shadow: inset 0 1px 0 rgba(255,255,255,.04); }
+.lf-stat-accent { background: linear-gradient(145deg, #31215b, #23183f); border-color: rgba(167,139,250,.33); }
+.lf-stat-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.lf-stat-label { color: #cfc6dd; font-weight: 650; font-size: 12px; }
+.lf-stat-icon { display: grid; place-items: center; width: 35px; height: 35px; border-radius: 11px; color: #cdb0ff; background: rgba(153,104,250,.13); }
+.lf-stat-icon .lf-icon { width: 18px; height: 18px; }
+.lf-stat-value { display: block; color: #fff; font-size: clamp(29px,3vw,37px); font-weight: 850; line-height: 1.2; letter-spacing: -.06em; margin: 5px 0; }
+.lf-stat-caption { font-size: 11px; color: #a99fbd; }
+.lf-actions-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 13px; }
+.lf-dashboard .lf-action-card { display: flex; position: relative; flex-direction: column; min-width: 0; min-height: 205px; gap: 19px; padding: 23px; border: 1px solid var(--lf-border); border-radius: 17px; background: linear-gradient(140deg, rgba(34,27,55,.96), rgba(20,17,35,.96)); transition: transform .23s ease, border-color .23s ease, box-shadow .23s ease, background .23s ease; }
+.lf-dashboard .lf-action-card:hover { transform: translateY(-5px); border-color: rgba(173,128,255,.57); box-shadow: 0 16px 34px rgba(5,3,16,.35), inset 0 1px 0 rgba(255,255,255,.06); background: linear-gradient(140deg, #302249, #201735); }
+.lf-action-icon { display: grid; place-items: center; width: 49px; height: 49px; border-radius: 14px; }
+.lf-action-icon .lf-icon { width: 25px; height: 25px; }
+.lf-action-violet { background: rgba(139,92,246,.2); color: #c4a3ff; }
+.lf-action-indigo { background: rgba(99,102,241,.2); color: #b7b8ff; }
+.lf-action-cyan { background: rgba(34,211,238,.13); color: #78e7f3; }
+.lf-action-pink { background: rgba(236,72,153,.15); color: #f7a7d3; }
+.lf-action-amber { background: rgba(245,158,11,.13); color: #fcd28a; }
+.lf-action-green { background: rgba(52,211,153,.12); color: #9cf0cb; }
+.lf-action-copy { display: block; margin-right: 11px; }
+.lf-action-copy strong { display: block; font-size: 15px; line-height: 1.4; color: #faf8ff; letter-spacing: -.01em; }
+.lf-action-copy > span { display: block; font-size: 12px; color: #aba2bf; line-height: 1.65; margin-top: 7px; }
+.lf-card-arrow { position: absolute; top: 25px; right: 22px; color: #8d80ad; width: 19px; height: 19px; transform: rotate(-45deg); transition: transform .2s ease, color .2s ease; }
+.lf-dashboard .lf-action-card:hover .lf-card-arrow { color: #dfc8ff; transform: translate(3px,-3px) rotate(-45deg); }
+.lf-dashboard .lf-action-admin { border-color: rgba(172,119,248,.4); background: linear-gradient(140deg,#2b1d49,#1a1631); }
+.lf-role-tag { display: inline-block; vertical-align: middle; margin-left: 5px; padding: 3px 6px; border-radius: 5px; background: rgba(176,145,250,.2); color: #dccaff; font-size: 9px; letter-spacing: .08em; }
+.lf-notification-list { display: grid; gap: 10px; }
+.lf-notification { display: flex; align-items: center; gap: 14px; border-radius: 14px; border: 1px solid rgba(149,121,222,.3); background: #211a36; padding: 17px; }
+.lf-notification-symbol { display: grid; place-items: center; width: 37px; height: 37px; border-radius: 11px; flex: none; color: #c9adff; background: rgba(149,97,250,.16); }
+.lf-notification-copy { flex: 1; min-width: 0; }
+.lf-notification-copy h3 { margin: 0 0 5px; font-size: 14px; }
+.lf-notification-copy p { margin: 0 0 8px; color: #d5cce8; font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; }
+.lf-notification-copy time { font-size: 11px; color: #aba1c0; }
+.lf-notification-form { margin: 0; flex: none; }
+.lf-dashboard .lf-notice-button { display: inline-flex; align-items: center; gap: 6px; padding: 9px 12px; border: 1px solid rgba(180,143,245,.48); border-radius: 9px; color: #e9dbff; background: rgba(122,75,225,.2); font-size: 12px; font-weight: 750; }
+.lf-dashboard .lf-notice-button:hover { border-color: #c49dff; background: rgba(122,75,225,.35); color: #fff; }
+.lf-notice-button .lf-icon { width: 14px; height: 14px; }
+.lf-count-pill { border: 1px solid rgba(179,135,255,.3); border-radius: 30px; background: rgba(145,91,245,.12); color: #dcc6ff; font-size: 11px; font-weight: 700; padding: 7px 11px; }
+.lf-profile-section { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px; margin-top: 32px; padding: 20px 22px; border: 1px solid var(--lf-border); border-radius: 15px; background: rgba(29,24,45,.75); }
+.lf-profile-id { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.lf-profile-avatar { display: grid; place-items: center; flex: none; width: 52px; height: 52px; border-radius: 15px; background: linear-gradient(145deg, #a475ef, #6736c8); color: #fff; font-size: 17px; font-weight: 900; box-shadow: 0 6px 16px rgba(99,51,199,.25); }
+.lf-profile-id h2 { margin: 4px 0 2px; font-size: 15px; }
+.lf-profile-email { display: block; font-size: 12px; color: #c2b9d5; overflow-wrap: anywhere; }
+.lf-profile-meta { display: flex; flex-wrap: wrap; gap: 7px; }
+.lf-meta-chip { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 6px 10px; border-radius: 8px; background: rgba(122,101,161,.16); border: 1px solid rgba(173,156,207,.18); color: #e1d8ef; font-size: 11px; font-weight: 700; overflow-wrap: anywhere; }
+.lf-meta-chip .lf-icon { width: 14px; height: 14px; }
+.lf-meta-admin { background: rgba(151,96,236,.2); color: #e5ccff; border-color: rgba(169,113,251,.35); }
+.lf-footer { text-align: center; color: #837a9c !important; letter-spacing: .1em; font-weight: 650; font-size: 10px; margin: 27px 0 0 !important; }
+.lf-footer span { color: #9e76e9; padding: 0 4px; }
+@media (max-width: 980px) {
+    .lf-stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .lf-actions-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .lf-hero-art { flex-basis: 170px; width: 170px; height: 170px; }
+    .lf-orbit-inner { inset: 30px; } .lf-orbit-core { inset: 55px; border-radius: 14px; }
+}
+@media (max-width: 650px) {
+    body:has(.lf-dashboard) main { width: calc(100% - 16px); margin: 14px auto; border-radius: 17px; }
+    .lf-dashboard { padding: 14px; }
+    .lf-hero { padding: 26px 20px; border-radius: 16px; min-height: auto; }
+    .lf-hero-art { display: none; }
+    .lf-hero-actions { margin-top: 22px; }
+    .lf-section { margin-top: 29px; }
+    .lf-section-note { display: none; }
+    .lf-actions-grid { grid-template-columns: 1fr; }
+    .lf-dashboard .lf-action-card { flex-direction: row; min-height: 122px; gap: 14px; padding: 18px; align-items: center; }
+    .lf-action-icon { flex: none; width: 45px; height: 45px; }
+    .lf-card-arrow { top: 17px; right: 15px; }
+    .lf-action-copy { padding-right: 7px; }
+    .lf-notification { flex-wrap: wrap; }
+    .lf-notification-form { width: 100%; padding-left: 50px; }
+}
+@media (max-width: 380px) {
+    .lf-stats-grid { gap: 8px; }
+    .lf-stat-card { padding: 14px 11px; }
+    .lf-stat-label { font-size: 10px; }
+    .lf-stat-icon { width: 28px; height: 28px; }
+    .lf-dashboard .lf-primary-action, .lf-dashboard .lf-secondary-action { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .lf-dashboard *, .lf-dashboard *::before, .lf-dashboard *::after { animation: none !important; transition-duration: .01ms !important; }
+}
