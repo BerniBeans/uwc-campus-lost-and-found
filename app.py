@@ -11,6 +11,7 @@ from uuid import uuid4
 
 from flask import (
     Flask,
+    Response,
     abort,
     flash,
     redirect,
@@ -60,7 +61,11 @@ from models import (
 
 # Do not display ID documents or wallet photographs in the public item feed.
 SENSITIVE_IMAGE_CATEGORIES = {"IDENTIFICATION", "STUDENT_CARD", "WALLET"}
-IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
+IMAGE_MIMETYPES = {
+    ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png",
+    ".webp": "image/webp",
+}
+IMAGE_EXTENSIONS = set(IMAGE_MIMETYPES)
 
 
 # ---------------------------------------------------------
@@ -240,35 +245,32 @@ def calculate_match_score(
         )
 
     return min(score, 100), reasons
-def save_uploaded_image(file_storage, upload_folder: Path) -> str | None:
-    """Save verified image bytes outside Flask's public static directory."""
+def read_uploaded_image(file_storage) -> tuple[str | None, bytes | None]:
+    """Validate an upload and return a unique filename and durable image bytes.
+
+    PostgreSQL stores the bytes; local disk is retained only as a read-only
+    fallback for photographs uploaded with earlier application versions.
+    """
     if file_storage is None or not file_storage.filename:
-        return None
+        return None, None
 
     original_filename = secure_filename(file_storage.filename)
     extension = Path(original_filename).suffix.lower()
     if extension not in IMAGE_EXTENSIONS:
         raise ValueError("Only JPG, JPEG, PNG and WEBP images are allowed.")
 
-    # File extension validation alone is not sufficient: verify basic
-    # signature bytes without pulling in a separate image library.
-    signature = file_storage.stream.read(12)
-    file_storage.stream.seek(0)
+    contents = file_storage.stream.read()
+    signature = contents[:12]
     valid_image = (
         (extension in {".jpg", ".jpeg"} and signature.startswith(b"\xff\xd8\xff"))
         or (extension == ".png" and signature.startswith(b"\x89PNG\r\n\x1a\n"))
-        or (
-            extension == ".webp"
-            and signature.startswith(b"RIFF")
-            and signature[8:12] == b"WEBP"
-        )
+        or (extension == ".webp" and signature.startswith(b"RIFF")
+            and signature[8:12] == b"WEBP")
     )
     if not valid_image:
         raise ValueError("The selected file does not contain a valid image header.")
 
-    unique_filename = f"{uuid4().hex}{extension}"
-    file_storage.save(upload_folder / unique_filename)
-    return unique_filename
+    return f"{uuid4().hex}{extension}", contents
 
 
 def validate_safe_image_category(form) -> bool:
@@ -538,7 +540,8 @@ def create_app() -> Flask:
     # IMAGE UPLOAD CONFIGURATION
     # -----------------------------------------------------
 
-    # New uploads live in a private directory, not at /static/uploads/.
+    # Read-only fallback for photographs stored by older versions.
+    # New photographs are stored in the database (not the ephemeral disk).
     upload_folder = Path(app.instance_path) / "uploads"
     upload_folder.mkdir(parents=True, exist_ok=True)
     app.config["UPLOAD_FOLDER"] = str(upload_folder)
@@ -555,6 +558,18 @@ def create_app() -> Flask:
                 previous_image.unlink()
             else:
                 shutil.move(str(previous_image), str(destination))
+
+    @app.template_filter("image_available")
+    def image_available(item):
+        """Do not show a broken image element for a missing legacy photo."""
+        filename = getattr(item, "image_filename", None)
+        if not filename:
+            return False
+        if getattr(item, "image_data", None) is not None:
+            return True
+        if Path(filename).name != filename:
+            return False
+        return (Path(app.config["UPLOAD_FOLDER"]) / filename).is_file()
 
     @app.after_request
     def add_security_headers(response):
@@ -583,9 +598,59 @@ def create_app() -> Flask:
         ):
             abort(403)
 
-        response = send_from_directory(app.config["UPLOAD_FOLDER"], item.image_filename)
+        # New uploads are database-backed and survive Render redeploys.
+        if item.image_data is not None:
+            suffix = Path(item.image_filename).suffix.lower()
+            content_type = IMAGE_MIMETYPES.get(suffix)
+            if content_type is None:
+                abort(404)
+            response = Response(item.image_data, mimetype=content_type)
+        else:
+            # Legacy local images remain accessible until their files vanish.
+            response = send_from_directory(
+                app.config["UPLOAD_FOLDER"], item.image_filename
+            )
         response.headers["Cache-Control"] = "private, no-store"
         return response
+
+    @app.post("/item-images/<string:report_type>/<int:item_id>/replace")
+    @login_required
+    def replace_item_image(report_type: str, item_id: int):
+        """Let the original reporter replace a missing or outdated photo."""
+        if report_type == "lost":
+            item = db.session.get(LostItem, item_id)
+            owner_id = item.reporter_id if item else None
+        elif report_type == "found":
+            item = db.session.get(FoundItem, item_id)
+            owner_id = item.finder_id if item else None
+        else:
+            abort(404)
+
+        if item is None:
+            abort(404)
+        if current_user.id != owner_id or item.category in SENSITIVE_IMAGE_CATEGORIES:
+            abort(403)
+
+        try:
+            filename, contents = read_uploaded_image(request.files.get("image"))
+        except ValueError as exc:
+            flash(str(exc), "error")
+            return redirect(url_for("search_items"))
+        if contents is None:
+            flash("Choose an image to upload.", "error")
+            return redirect(url_for("search_items"))
+
+        item.image_filename = filename
+        item.image_data = contents
+        try:
+            db.session.commit()
+        except SQLAlchemyError:
+            db.session.rollback()
+            app.logger.exception("Failed to replace item image.")
+            flash("The photograph could not be saved. Please try again.", "error")
+        else:
+            flash("The item photograph was updated successfully.", "success")
+        return redirect(url_for("search_items"))
 
     # Limit each request to 5 MB.
     app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024
@@ -927,10 +992,7 @@ def create_app() -> Flask:
                 return render_template("report_lost_item.html", form=form)
 
             try:
-                image_filename = save_uploaded_image(
-                    form.image.data,
-                    Path(app.config["UPLOAD_FOLDER"]),
-                )
+                image_filename, image_data = read_uploaded_image(form.image.data)
             except ValueError as exc:
                 form.image.errors.append(str(exc))
                 return render_template("report_lost_item.html", form=form)
@@ -946,6 +1008,7 @@ def create_app() -> Flask:
                 lost_time=form.lost_time.data,
                 location=form.location.data,
                 image_filename=image_filename,
+                image_data=image_data,
                 private_details=(
                     form.private_details.data.strip()
                 ),
@@ -1013,10 +1076,7 @@ def create_app() -> Flask:
                 return render_template("report_found_item.html", form=form)
 
             try:
-                image_filename = save_uploaded_image(
-                    form.image.data,
-                    Path(app.config["UPLOAD_FOLDER"]),
-                )
+                image_filename, image_data = read_uploaded_image(form.image.data)
             except ValueError as exc:
                 form.image.errors.append(str(exc))
                 return render_template("report_found_item.html", form=form)
@@ -1033,6 +1093,7 @@ def create_app() -> Flask:
                 found_time=form.found_time.data,
                 location=form.location.data,
                 image_filename=image_filename,
+                image_data=image_data,
                 private_details=(
                     form.private_details.data.strip()
                 ),

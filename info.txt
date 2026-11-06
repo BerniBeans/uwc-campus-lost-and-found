@@ -1,0 +1,30 @@
+
+Student number: 123456789
+First name: Test
+Surname: Student
+Email: teststudent@example.com
+Password:(space) Password123
+Confirm password: Password123
+
+Test report
+Category: Money or wallet
+Item name: Black leather wallet
+Public description: Small black leather wallet with a silver zip
+Colour: Black
+Brand: Leave blank
+Date lost: Select today
+Approximate time: 10:30
+Location: Library
+Private identifying details: Contains a blue bank card and a small family photograph
+
+Student number: 987654321
+Name: Found
+Surname: User
+Email: founduser@example.com
+Password: Password123
+
+Student number: ADMIN001
+First name: System
+Surname: Administrator
+Email: berniadmin@gmail.com
+Password: AdminPassword123

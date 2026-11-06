@@ -189,6 +189,7 @@
                         <article class="item-card lost-card">
 
                             {% if item.image_filename and item.category not in ["IDENTIFICATION", "STUDENT_CARD", "WALLET"] %}
+                                {% if item|image_available %}
                                 <div class="item-image-container">
                                     <img
                                         src="{{ url_for('item_image', report_type='lost', item_id=item.id) }}"
@@ -196,8 +197,19 @@
                                         class="item-image"
                                     >
                                 </div>
+                                {% else %}
+                                <div class="item-image-unavailable" role="status">Photograph unavailable (please re-upload)</div>
+                                {% endif %}
                             {% endif %}
 
+                            {% if current_user.id == item.reporter_id and item.category not in ["IDENTIFICATION", "STUDENT_CARD", "WALLET"] %}
+                                <form method="POST" action="{{ url_for('replace_item_image', report_type='lost', item_id=item.id) }}" enctype="multipart/form-data" class="item-photo-update">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <label for="photo-lost-{{ item.id }}">Upload or replace item photograph</label>
+                                    <input type="file" id="photo-lost-{{ item.id }}" name="image" accept="image/jpeg,image/png,image/webp" required>
+                                    <button type="submit">Save photograph</button>
+                                </form>
+                            {% endif %}
 
                             <div class="card-heading">
                                 <h3>{{ item.item_name }}</h3>
@@ -287,6 +299,7 @@
                     {% for item in found_items %}
                         <article class="item-card found-card">
                             {% if item.image_filename and item.category not in ["IDENTIFICATION", "STUDENT_CARD", "WALLET"] %}
+                                {% if item|image_available %}
                                 <div class="item-image-container">
                                     <img
                                         src="{{ url_for('item_image', report_type='found', item_id=item.id) }}"
@@ -294,8 +307,19 @@
                                         class="item-image"
                                     >
                                 </div>
+                                {% else %}
+                                <div class="item-image-unavailable" role="status">Photograph unavailable (please re-upload)</div>
+                                {% endif %}
                             {% endif %}
 
+                            {% if current_user.id == item.finder_id and item.category not in ["IDENTIFICATION", "STUDENT_CARD", "WALLET"] %}
+                                <form method="POST" action="{{ url_for('replace_item_image', report_type='found', item_id=item.id) }}" enctype="multipart/form-data" class="item-photo-update">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <label for="photo-found-{{ item.id }}">Upload or replace item photograph</label>
+                                    <input type="file" id="photo-found-{{ item.id }}" name="image" accept="image/jpeg,image/png,image/webp" required>
+                                    <button type="submit">Save photograph</button>
+                                </form>
+                            {% endif %}
                             <div class="card-heading">
                                 <h3>{{ item.item_name }}</h3>
 
@@ -389,9 +413,9 @@
 
   <style>
     .search-form {
-        background: #f9fafb;
-        border: 1px solid #d1d5db;
-        border-radius: 8px;
+        background: #1c162f;
+        border: 1px solid rgba(194, 164, 255, .26);
+        border-radius: 17px;
         margin: 24px 0;
         padding: 20px;
     }
@@ -416,22 +440,24 @@
     }
 
     .clear-button {
-        background: #e5e7eb;
-        border: 2px solid #d1d5db;
-        border-radius: 4px;
-        color: #111827;
+        background: #2e2543;
+        border: 1px solid rgba(194, 164, 255, .3);
+        border-radius: 10px;
+        color: #eee6fb;
         font-weight: bold;
         padding: 12px 20px;
         text-decoration: none;
     }
 
     .clear-button:hover {
-        background: #d1d5db;
+        background: #403056;
+        color: #ffffff;
     }
 
     .result-summary {
-        background: #eff6ff;
-        border-left: 4px solid #2563eb;
+        background: rgba(120, 70, 207, .13);
+        border-left: 4px solid #b58bff;
+        color: #e6d6ff;
         margin: 20px 0;
         padding: 12px 16px;
     }
@@ -446,11 +472,16 @@
     }
 
     .item-card {
-        background: #ffffff;
-        border: 1px solid #d1d5db;
-        border-radius: 8px;
+        background: linear-gradient(145deg, #241b37, #171326);
+        border: 1px solid rgba(194, 164, 255, .25);
+        border-radius: 17px;
         padding: 20px;
+        color: #dbd4e7;
     }
+
+    .item-card h3 { color: #ffffff; }
+    .item-card p { color: #d4cbe4; }
+    .item-card strong { color: #fff0ff; }
 
     .lost-card {
         border-left: 5px solid #dc2626;
@@ -491,10 +522,10 @@
     }
 
     .empty-result {
-        background: #f9fafb;
-        border: 1px dashed #9ca3af;
-        border-radius: 8px;
-        color: #4b5563;
+        background: rgba(114, 70, 181, .12);
+        border: 1px dashed rgba(194, 151, 255, .34);
+        border-radius: 12px;
+        color: #d2c6e4;
         padding: 20px;
     }
 
@@ -505,8 +536,8 @@
     }
 
     .item-image {
-        border: 1px solid #d1d5db;
-        border-radius: 8px;
+        border: 1px solid rgba(194, 164, 255, .25);
+        border-radius: 12px;
         display: block;
         height: 220px;
         margin: 0 auto;

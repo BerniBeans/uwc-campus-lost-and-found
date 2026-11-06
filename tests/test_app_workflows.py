@@ -60,6 +60,7 @@ class ApplicationWorkflowTest(unittest.TestCase):
         with app.app_context():
             db.session.remove()
             db.drop_all()
+            db.engine.dispose()
         _TEST_TEMP.cleanup()
 
     def test_registration_duplicates_and_full_claim_workflow(self):
@@ -88,12 +89,27 @@ class ApplicationWorkflowTest(unittest.TestCase):
         with app.app_context():
             lost_id = LostItem.query.one().id
             image_name = LostItem.query.one().image_filename
+            self.assertEqual(LostItem.query.one().image_data, PNG_BYTES)
         self.assertTrue(image_name)
         image_response = student.get(f"/item-images/lost/{lost_id}")
         self.assertEqual(image_response.status_code, 200)
+        self.assertEqual(image_response.data, PNG_BYTES)
+        self.assertEqual(image_response.mimetype, "image/png")
         image_response.close()
+        # The new upload no longer relies on an ephemeral local file.
+        self.assertFalse((Path(app.config["UPLOAD_FOLDER"]) / image_name).exists())
         self.assertEqual(public.get(f"/item-images/lost/{lost_id}").status_code, 302)
         self.assertEqual(public.get(f"/static/uploads/{image_name}").status_code, 404)
+        # Only the reporting user may replace an image.
+        self.assertEqual(staff.post(f"/item-images/lost/{lost_id}/replace", data={
+            "image": (BytesIO(PNG_BYTES), "hijacked.png")},
+            content_type="multipart/form-data").status_code, 403)
+        self.assertEqual(student.post(f"/item-images/lost/{lost_id}/replace", data={
+            "image": (BytesIO(PNG_BYTES), "replacement.png")},
+            content_type="multipart/form-data").status_code, 302)
+        with app.app_context():
+            self.assertNotEqual(LostItem.query.one().image_filename, image_name)
+            self.assertEqual(LostItem.query.one().image_data, PNG_BYTES)
 
         self.assertEqual(staff.post("/found-items/report", data=found_form()).status_code, 302)
         with app.app_context():
@@ -109,7 +125,19 @@ class ApplicationWorkflowTest(unittest.TestCase):
                           location="PARKING")
         self.assertEqual(staff.post("/found-items/report", data=weak_found).status_code, 302)
         with app.app_context():
-            weak_item_id = db.session.query(FoundItem).filter_by(item_name="Unrelated tablet").one().id
+            weak_item = db.session.query(FoundItem).filter_by(item_name="Unrelated tablet").one()
+            weak_item_id = weak_item.id
+            weak_item.image_filename = "missing-legacy-photo.png"
+            db.session.commit()
+        # Existing records with deleted local photos show a useful fallback,
+        # then the owner can upload a durable replacement.
+        self.assertEqual(student.get(f"/item-images/found/{weak_item_id}").status_code, 404)
+        self.assertIn(b"Photograph unavailable", staff.get("/items/search").data)
+        self.assertEqual(staff.post(f"/item-images/found/{weak_item_id}/replace", data={
+            "image": (BytesIO(PNG_BYTES), "tablet.png")},
+            content_type="multipart/form-data").status_code, 302)
+        self.assertEqual(staff.get(f"/item-images/found/{weak_item_id}").data, PNG_BYTES)
+        self.assertNotIn(b"Photograph unavailable", staff.get("/items/search").data)
         self.assertNotIn(f"F-{weak_item_id}".encode(), student.get("/matches").data)
 
         # Staff finder cannot claim their own found item.
@@ -167,7 +195,7 @@ class ApplicationWorkflowTest(unittest.TestCase):
                 finder_id=staff_user.id, category="STUDENT_CARD", item_name="UWC card",
                 description="A found card with a distinctive blue lanyard",
                 colour="Blue", brand=None, found_date=__import__("datetime").date(2026, 10, 11),
-                location="LIBRARY", image_filename=image_name,
+                location="LIBRARY", image_filename=image_name, image_data=PNG_BYTES,
                 private_details="Card back has a small scratch",
                 storage_location="CAMPUS_SECURITY", status="REPORTED_FOUND"
             )

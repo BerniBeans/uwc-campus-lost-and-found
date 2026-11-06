@@ -76,3 +76,11 @@ button,input[type="submit"],.review-button,.action-button,.claim-button,.clear-b
 .lf-auth-emblem-ring{position:absolute;inset:10px;border:1px solid rgba(249,226,255,.29);border-radius:50%}.lf-auth-emblem-ring.ring-inner{inset:20px;border-style:dashed}.lf-auth-emblem-centre{display:grid;place-items:center;width:70px;height:70px;background:linear-gradient(135deg,#b18aff,#6d34ca);border-radius:20px;box-shadow:0 7px 22px rgba(28,12,60,.4);z-index:1}.lf-auth-star{position:absolute;color:#f7deff;font-size:19px;top:-8px;left:-13px}.lf-auth-star.star-two{left:auto;top:auto;bottom:-12px;right:-13px}
 @media(max-width:760px){.lf-auth{grid-template-columns:1fr}.lf-auth-showcase{min-height:245px}.lf-auth-panel{padding:28px}}
 @media(max-width:490px){.lf-form-row{grid-template-columns:1fr;gap:0}.lf-auth-showcase h1{font-size:34px}}
+
+/* A legacy item can still reference a photo lost on an ephemeral web host. */
+.item-image-unavailable{display:flex;align-items:center;justify-content:center;min-height:92px;margin:0 0 14px;padding:16px;border:1px dashed rgba(194,164,255,.42);border-radius:12px;background:rgba(110,70,160,.11);color:#decffa;font-size:12px;text-align:center}
+
+.item-photo-update{display:flex;flex-wrap:wrap;align-items:center;gap:9px 14px;margin:12px 0 17px;padding:12px;border:1px solid rgba(194,164,255,.23);border-radius:12px;background:rgba(118,77,194,.11)}
+.item-photo-update label{flex-basis:100%;font-size:12px;color:#e4d7f5;margin:0}
+.item-photo-update input[type="file"]{max-width:100%;min-width:200px;flex:1;color:#ddd2ef;font-size:12px}
+.item-photo-update button{min-height:36px;padding:7px 12px;font-size:12px}

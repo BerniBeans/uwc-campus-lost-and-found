@@ -164,6 +164,9 @@ class LostItem(db.Model):
         db.String(255),
         nullable=True,
     )
+    # Stored in the database so photos survive web-service restarts/deploys.
+    # NULL retains compatibility with previously uploaded local files.
+    image_data = db.Column(db.LargeBinary, nullable=True)
     private_details = db.Column(
         db.Text,
         nullable=False,
@@ -258,6 +261,9 @@ class FoundItem(db.Model):
         db.String(255),
         nullable=True,
     )
+    # Stored in the database so photos survive web-service restarts/deploys.
+    # NULL retains compatibility with previously uploaded local files.
+    image_data = db.Column(db.LargeBinary, nullable=True)
     private_details = db.Column(
         db.Text,
         nullable=False,
